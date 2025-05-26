@@ -181,15 +181,70 @@ app.post('/agendar', autenticar, async (req, res) => {
 
 // ========== LISTAR AGENDAMENTOS ==========
 // Exemplo no server.js ou routes.js
-app.get('/api/agendamentos', async (req, res) => {
+app.get('/api/agendamentos', autenticar, async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM agendamentos ORDER BY data_envio_texto ASC');
+    const result = await pool.query(
+      'SELECT * FROM agendamentos WHERE visivel = true ORDER BY data_envio_texto ASC'
+    );
     res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao buscar agendamentos' });
   }
 });
+
+
+//== enviado
+app.put('/api/agendamentos/ocultar-historico/:id', autenticar, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'UPDATE agendamentos SET visivel = false WHERE id = $1 AND enviado = true RETURNING *',
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Agendamento não encontrado ou não foi enviado' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erro ao ocultar do histórico:', err);
+    res.status(500).json({ success: false, error: 'Erro ao ocultar do histórico' });
+  }
+});
+
+
+
+
+
+//====ocultar agendamento====//
+app.put('/api/agendamentos/ocultar/:id', autenticar, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'UPDATE agendamentos SET visivel = false WHERE id = $1 AND enviado = false RETURNING *',
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Agendamento não encontrado ou já foi enviado' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erro ao ocultar agendamento:', err);
+    res.status(500).json({ success: false, error: 'Erro ao ocultar agendamento' });
+  }
+});
+
+
+
+
+
+
 
 //====================cenelar ciclo==============
 app.put('/api/cancelar-ciclo/:id', autenticar, async (req, res) => {
@@ -241,26 +296,7 @@ app.put('/api/agendamentos/:id', autenticar, async (req, res) => {
   }
 });
 
-//==============delete===========
-app.delete('/api/agendamentos/:id', autenticar, async (req, res) => {
-  const { id } = req.params;
 
-  try {
-    const { rowCount } = await pool.query(
-      'DELETE FROM agendamentos WHERE id = $1 AND enviado = false',
-      [id]
-    );
-
-    if (rowCount === 0) {
-      return res.status(404).json({ success: false, message: 'Agendamento não encontrado ou já enviado' });
-    }
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error('Erro ao remover agendamento:', err);
-    res.status(500).json({ error: 'Erro ao remover agendamento' });
-  }
-});
 
 
 
