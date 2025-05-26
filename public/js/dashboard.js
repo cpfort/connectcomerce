@@ -171,6 +171,11 @@ function adicionarEventosBotoes() {
 // 🔄 Atualiza lista quando muda filtro
 filtro.addEventListener('change', carregarAgendamentos);
 
+function baixarRelatorio(filtro) {
+  window.open(`/api/relatorio?filtro=${filtro}`, '_blank');
+}
+
+
 // 🚀 Inicialização
 window.addEventListener('DOMContentLoaded', async () => {
   await obterCsrfToken();

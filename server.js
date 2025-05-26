@@ -13,6 +13,8 @@ const pgSession = require('connect-pg-simple')(session);
 const bcrypt = require('bcryptjs');
 const agendamentoSchema = require('./validators/agendamentoValidator');
 const autenticar = require('./middlewares/auth');
+const ExcelJS = require('exceljs');
+
 
 
 
@@ -236,6 +238,75 @@ app.delete('/api/agendamentos/:id', autenticar, async (req, res) => {
   }
 });
 
+//==== relatiro dinamico
+app.get('/api/relatorio', autenticar, async (req, res) => {
+  const filtro = req.query.filtro || 'todos';
+
+  try {
+    let query = 'SELECT * FROM agendamentos';
+    const params = [];
+
+    if (filtro === 'pendentes') {
+      query += ' WHERE enviado = false AND visivel = true';
+    } else if (filtro === 'enviados') {
+      query += ' WHERE enviado = true AND visivel = true';
+    } else if (filtro === 'ocultos') {
+      query += ' WHERE visivel = false';
+    } else if (filtro === 'todos') {
+      // Sem where
+    }
+
+    query += ' ORDER BY data_envio_texto ASC';
+
+    const result = await pool.query(query, params);
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Relatorio_Agendamentos');
+
+    // Cabeçalho
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 10 },
+      { header: 'Cliente', key: 'cliente', width: 20 },
+      { header: 'Número', key: 'numero', width: 20 },
+      { header: 'Mensagem', key: 'mensagem', width: 50 },
+      { header: 'Data de Envio', key: 'data_envio_texto', width: 25 },
+      { header: 'Ciclo', key: 'ciclo', width: 15 },
+      { header: 'Enviado', key: 'enviado', width: 10 },
+      { header: 'Visível', key: 'visivel', width: 10 },
+    ];
+
+    // Dados
+    result.rows.forEach(ag => {
+      worksheet.addRow({
+        id: ag.id,
+        cliente: ag.cliente,
+        numero: ag.numero,
+        mensagem: ag.mensagem,
+        data_envio_texto: ag.data_envio_texto,
+        ciclo: ag.ciclo,
+        enviado: ag.enviado ? 'Sim' : 'Não',
+        visivel: ag.visivel ? 'Sim' : 'Não'
+      });
+    });
+
+    // Response
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=relatorio-agendamentos.xlsx`
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (err) {
+    console.error('Erro ao gerar relatório:', err);
+    res.status(500).send('Erro ao gerar relatório');
+  }
+});
 
 
 
