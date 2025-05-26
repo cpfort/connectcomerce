@@ -54,15 +54,17 @@ async function carregarAgendamentos() {
     agendamentos.forEach(ag => {
       const div = document.createElement('div');
       div.className = 'agendamento' + (ag.enviado ? ' enviado' : '');
-     div.innerHTML = `
-      <strong>${ag.cliente}</strong>
-      <div>${ag.numero}</div>
-      <div><em>${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}</em></div>
-      <div>${ag.mensagem}</div>
-      <div><strong>Ciclo:</strong> ${ag.ciclo === 'nenhum' ? 'Nenhum' : ag.ciclo}</div>
-      ${!ag.enviado ? `<button class="removerBtn" data-id="${ag.id}">🗑️ Remover</button>` : ''}
-      ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌ Cancelar Ciclo</button>` : ''}
-    `;
+    div.innerHTML = `
+          <div>
+            <strong>${ag.cliente}</strong><br>
+            Número: ${ag.numero}<br>
+            Mensagem: ${ag.mensagem}<br>
+            Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
+            Ciclo: ${ag.ciclo}<br>
+            ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌ Cancelar Ciclo</button>` : ''}
+            <button class="removerBtn" data-id="${ag.id}">🗑️ Remover</button>
+          </div>
+        `;
       container.appendChild(div);
     });
 
@@ -96,7 +98,6 @@ async function carregarAgendamentos() {
   }
 }
 
-
 document.querySelectorAll('.cancelarCicloBtn').forEach(btn => {
   btn.addEventListener('click', async () => {
     const id = btn.getAttribute('data-id');
@@ -112,10 +113,10 @@ document.querySelectorAll('.cancelarCicloBtn').forEach(btn => {
 
       const json = await res.json();
       if (json.success) {
-        alert('✅ Ciclo cancelado');
+        alert('✅ Ciclo cancelado com sucesso!');
         carregarAgendamentos();
       } else {
-        alert('⚠️ Erro ao cancelar ciclo');
+        alert('⚠️ Erro ao cancelar ciclo: ' + json.message);
       }
     } catch (err) {
       console.error('Erro ao cancelar ciclo:', err);
@@ -123,6 +124,7 @@ document.querySelectorAll('.cancelarCicloBtn').forEach(btn => {
     }
   });
 });
+
 
 
 // Inicia carregamento dos agendamentos quando a página abre
