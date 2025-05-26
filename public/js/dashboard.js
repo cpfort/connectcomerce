@@ -1,16 +1,17 @@
 const form = document.getElementById('formMensagem');
+const filtro = document.getElementById('filtro');
 let csrfToken = '';
 
 Inputmask({ "mask": "+55 (99) 99999-9999" }).mask(document.getElementById('numero'));
 
-// 🔥 Buscar CSRF token no carregamento
+// 🔥 Obter CSRF token
 async function obterCsrfToken() {
   const res = await fetch('/api/csrf-token');
   const data = await res.json();
   csrfToken = data.csrfToken;
 }
 
-// 🧠 Submit do formulário
+// ✅ Submit do formulário
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -46,7 +47,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// 🔥 Carregar agendamentos
+// 🔥 Carregar e aplicar filtro nos agendamentos
 async function carregarAgendamentos() {
   try {
     const res = await fetch('/api/agendamentos', {
@@ -54,16 +55,7 @@ async function carregarAgendamentos() {
       credentials: 'include'
     });
 
-    if (res.status === 403) {
-      throw new Error('Acesso negado: verifique login e token CSRF');
-    }
-
-    if (!res.ok) {
-      throw new Error(`Erro na requisição: ${res.status}`);
-    }
-
     const agendamentos = await res.json();
-
     const container = document.getElementById('listaAgendamentos');
     container.innerHTML = '';
 
@@ -72,7 +64,28 @@ async function carregarAgendamentos() {
       return;
     }
 
-    agendamentos.forEach(ag => {
+    const filtroSelecionado = filtro.value;
+
+    const filtrados = agendamentos.filter(ag => {
+      switch (filtroSelecionado) {
+        case 'pendentes':
+          return ag.enviado === false && ag.visivel === true;
+        case 'enviados':
+          return ag.enviado === true && ag.visivel === true;
+        case 'ocultos':
+          return ag.visivel === false;
+        case 'todos':
+        default:
+          return true;
+      }
+    });
+
+    if (filtrados.length === 0) {
+      container.innerHTML = '<p>Nenhum agendamento encontrado neste filtro.</p>';
+      return;
+    }
+
+    filtrados.forEach(ag => {
       const div = document.createElement('div');
       div.className = 'agendamento' + (ag.enviado ? ' enviado' : '');
       div.innerHTML = `
@@ -94,84 +107,71 @@ async function carregarAgendamentos() {
       container.appendChild(div);
     });
 
-    // 🔥 Cancelar Ciclo
-    document.querySelectorAll('.cancelarCicloBtn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-id');
-        if (!confirm('Deseja cancelar o ciclo deste agendamento?')) return;
-        try {
-          const res = await fetch(`/api/cancelar-ciclo/${id}`, {
-            method: 'PUT',
-            headers: { 'CSRF-Token': csrfToken }
-          });
-          const json = await res.json();
-          if (json.success) {
-            alert('✅ Ciclo cancelado');
-            carregarAgendamentos();
-          } else {
-            alert('⚠️ Erro ao cancelar ciclo: ' + json.message);
-          }
-        } catch (err) {
-          console.error('Erro ao cancelar ciclo:', err);
-          alert('Erro no servidor');
-        }
-      });
-    });
-
-    // 🔥 Remover (Antes de ser enviado)
-    document.querySelectorAll('.removerBtn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-id');
-        if (!confirm('Deseja remover este agendamento? Essa ação não pode ser desfeita.')) return;
-        try {
-          const res = await fetch(`/api/agendamentos/${id}`, {
-            method: 'DELETE',
-            headers: { 'CSRF-Token': csrfToken }
-          });
-          const json = await res.json();
-          if (json.success) {
-            alert('✅ Agendamento removido');
-            carregarAgendamentos();
-          } else {
-            alert('⚠️ Erro ao remover: ' + json.message);
-          }
-        } catch (err) {
-          console.error('Erro ao remover:', err);
-          alert('Erro no servidor');
-        }
-      });
-    });
-
-    // 🔥 Ocultar do histórico (Depois de enviado)
-    document.querySelectorAll('.ocultarHistoricoBtn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-id');
-        if (!confirm('Deseja ocultar este agendamento do histórico?')) return;
-        try {
-          const res = await fetch(`/api/agendamentos/ocultar-historico/${id}`, {
-            method: 'PUT',
-            headers: { 'CSRF-Token': csrfToken }
-          });
-          const json = await res.json();
-          if (json.success) {
-            alert('✅ Agendamento ocultado do histórico');
-            carregarAgendamentos();
-          } else {
-            alert('⚠️ Erro ao ocultar do histórico: ' + json.message);
-          }
-        } catch (err) {
-          console.error('Erro ao ocultar do histórico:', err);
-          alert('Erro no servidor');
-        }
-      });
-    });
+    adicionarEventosBotoes();
 
   } catch (error) {
     console.error('Erro ao carregar agendamentos:', error);
   }
 }
 
-// 🚀 Inicia
+// 🎯 Adiciona eventos nos botões de ações
+function adicionarEventosBotoes() {
+  // Cancelar Ciclo
+  document.querySelectorAll('.cancelarCicloBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      if (!confirm('Deseja cancelar o ciclo?')) return;
+      const res = await fetch(`/api/cancelar-ciclo/${id}`, {
+        method: 'PUT',
+        headers: { 'CSRF-Token': csrfToken }
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert('✅ Ciclo cancelado!');
+        carregarAgendamentos();
+      }
+    });
+  });
+
+  // Remover (antes de enviado)
+  document.querySelectorAll('.removerBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      if (!confirm('Deseja remover este agendamento?')) return;
+      const res = await fetch(`/api/agendamentos/${id}`, {
+        method: 'DELETE',
+        headers: { 'CSRF-Token': csrfToken }
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert('✅ Agendamento removido!');
+        carregarAgendamentos();
+      }
+    });
+  });
+
+  // Ocultar histórico (após enviado)
+  document.querySelectorAll('.ocultarHistoricoBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      if (!confirm('Deseja ocultar este agendamento do histórico?')) return;
+      const res = await fetch(`/api/agendamentos/ocultar-historico/${id}`, {
+        method: 'PUT',
+        headers: { 'CSRF-Token': csrfToken }
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert('✅ Ocultado do histórico!');
+        carregarAgendamentos();
+      }
+    });
+  });
+}
+
+// 🔄 Atualiza lista quando muda filtro
+filtro.addEventListener('change', carregarAgendamentos);
+
+// 🚀 Inicialização
 window.addEventListener('DOMContentLoaded', async () => {
   await obterCsrfToken();
   carregarAgendamentos();
