@@ -54,20 +54,21 @@ async function carregarAgendamentos() {
     agendamentos.forEach(ag => {
       const div = document.createElement('div');
       div.className = 'agendamento' + (ag.enviado ? ' enviado' : '');
-    div.innerHTML = `
-          <div>
-            <strong>${ag.cliente}</strong><br>
-            Número: ${ag.numero}<br>
-            Mensagem: ${ag.mensagem}<br>
-            Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
-            Ciclo: ${ag.ciclo}<br>
-            ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌ Cancelar Ciclo</button>` : ''}
-            <button class="removerBtn" data-id="${ag.id}">🗑️ Remover</button>
-          </div>
-        `;
+      div.innerHTML = `
+        <div>
+          <strong>${ag.cliente}</strong><br>
+          Número: ${ag.numero}<br>
+          Mensagem: ${ag.mensagem}<br>
+          Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
+          Ciclo: ${ag.ciclo}<br>
+          ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌ Cancelar Ciclo</button>` : ''}
+          <button class="removerBtn" data-id="${ag.id}">🗑️ Remover</button>
+        </div>
+      `;
       container.appendChild(div);
     });
 
+    // Adiciona eventos para os botões de remover
     document.querySelectorAll('.removerBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
@@ -93,37 +94,40 @@ async function carregarAgendamentos() {
         }
       });
     });
+
+    // ✅ Adiciona eventos para os botões de cancelar ciclo (CORRIGIDO)
+    document.querySelectorAll('.cancelarCicloBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        if (!confirm('Deseja cancelar o ciclo deste agendamento?')) return;
+
+        try {
+          const res = await fetch(`/api/cancelar-ciclo/${id}`, {
+            method: 'PUT',
+            headers: {
+              'CSRF-Token': document.getElementById('csrfToken').value
+            }
+          });
+
+          const json = await res.json();
+          if (json.success) {
+            alert('✅ Ciclo cancelado com sucesso!');
+            carregarAgendamentos();
+          } else {
+            alert('⚠️ Erro ao cancelar ciclo: ' + json.message);
+          }
+        } catch (err) {
+          console.error('Erro ao cancelar ciclo:', err);
+          alert('Erro no servidor');
+        }
+      });
+    });
+
   } catch (err) {
     console.error('Erro ao carregar agendamentos:', err);
   }
 }
 
-document.querySelectorAll('.cancelarCicloBtn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const id = btn.getAttribute('data-id');
-    if (!confirm('Deseja cancelar o ciclo deste agendamento?')) return;
-
-    try {
-      const res = await fetch(`/api/cancelar-ciclo/${id}`, {
-        method: 'PUT',
-        headers: {
-          'CSRF-Token': document.getElementById('csrfToken').value
-        }
-      });
-
-      const json = await res.json();
-      if (json.success) {
-        alert('✅ Ciclo cancelado com sucesso!');
-        carregarAgendamentos();
-      } else {
-        alert('⚠️ Erro ao cancelar ciclo: ' + json.message);
-      }
-    } catch (err) {
-      console.error('Erro ao cancelar ciclo:', err);
-      alert('Erro no servidor');
-    }
-  });
-});
 
 
 
