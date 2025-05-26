@@ -5,7 +5,7 @@ const pool = require('../db');
 
 async function criarUsuario() {
   const usuario = 'admin';
-  const senhaPlana = 'senha123';
+  const senhaPlana = 'toca123';
   const senhaHash = await bcrypt.hash(senhaPlana, 10);
 
   try {

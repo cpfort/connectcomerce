@@ -140,32 +140,32 @@ img{
 
 
   <!-- Formulário -->
-  <form id="formMensagem">
-    <input type="hidden" name="_csrf" value="%%CSRF_TOKEN%%" id="csrfToken">
+<form id="formMensagem">
+  <input type="hidden" name="_csrf" value="%%CSRF_TOKEN%%" id="csrfToken">
 
-    <label for="numero">Número do WhatsApp:</label>
-    <input type="text" id="numero" name="numero" required>
+  <label for="numero">Número do WhatsApp:</label>
+  <input type="text" id="numero" name="numero" required>
 
-    <label for="cliente">Nome do Cliente:</label>
-    <input type="text" id="cliente" name="cliente" required>
+  <label for="cliente">Nome do Cliente:</label>
+  <input type="text" id="cliente" name="cliente" required>
 
-    <label for="carro">Veículo:</label>
-    <input type="text" id="carro" name="carro" required>
+  <label for="mensagem">Mensagem:</label>
+  <textarea id="mensagem" name="mensagem" rows="4" required></textarea>
 
-    <label for="motor">Motor:</label>
-    <input type="text" id="motor" name="motor" required>
+  <label for="dataEnvio">Data de Envio:</label>
+  <input type="datetime-local" id="dataEnvio" name="dataEnvio" required>
 
-    <label for="placa">Placa:</label>
-    <input type="text" id="placa" name="placa" required>
+  <label for="ciclo">Ciclo de Envio:</label>
+  <select id="ciclo" name="ciclo">
+    <option value="nenhum">Nenhum</option>
+    <option value="semanal">Semanal</option>
+    <option value="mensal">Mensal</option>
+    <option value="trimestral">Trimestral</option>
+  </select>
 
-    <label for="mensagem">Mensagem:</label>
-    <textarea id="mensagem" name="mensagem" rows="4" required></textarea>
+  <button type="submit">Agendar Mensagem</button>
+</form>
 
-    <label for="dataEnvio">Data de Envio:</label>
-    <input type="datetime-local" id="dataEnvio" name="dataEnvio" required>
-
-    <button type="submit">Agendar Mensagem</button>
-  </form>
 
 <form action="/logout" method="GET">
   <button type="submit" class="logout-button">Sair</button>

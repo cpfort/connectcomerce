@@ -59,3 +59,27 @@ function checkAndSendMessages() {
 
 
 module.exports = { checkAndSendMessages, loadAgendamentos, saveAgendamentos };
+
+
+if (ag.ciclo && ag.ciclo !== 'nenhum') {
+  const novaData = new Date(ag.data_envio_texto);
+  switch (ag.ciclo) {
+    case 'semanal':
+      novaData.setDate(novaData.getDate() + 7);
+      break;
+    case 'mensal':
+      novaData.setMonth(novaData.getMonth() + 1);
+      break;
+    case 'trimestral':
+      novaData.setMonth(novaData.getMonth() + 3);
+      break;
+  }
+
+  await pool.query(
+    `INSERT INTO agendamentos (numero, cliente, mensagem, data_envio_texto, ciclo, enviado)
+     VALUES ($1, $2, $3, $4, $5, false)`,
+    [ag.numero, ag.cliente, ag.mensagem, novaData.toISOString(), ag.ciclo]
+  );
+
+  console.log(`🔁 Novo agendamento criado para ${ag.numero} em ${novaData.toISOString()}`);
+}
