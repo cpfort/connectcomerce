@@ -171,9 +171,15 @@ function adicionarEventosBotoes() {
 // 🔄 Atualiza lista quando muda filtro
 filtro.addEventListener('change', carregarAgendamentos);
 
+document.getElementById('relatorioTodos').addEventListener('click', () => baixarRelatorio('todos'));
+document.getElementById('relatorioPendentes').addEventListener('click', () => baixarRelatorio('pendentes'));
+document.getElementById('relatorioEnviados').addEventListener('click', () => baixarRelatorio('enviados'));
+document.getElementById('relatorioOcultos').addEventListener('click', () => baixarRelatorio('ocultos'));
+
 function baixarRelatorio(filtro) {
   window.open(`/api/relatorio?filtro=${filtro}`, '_blank');
 }
+
 
 
 // 🚀 Inicialização
