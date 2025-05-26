@@ -191,6 +191,27 @@ app.get('/api/agendamentos', async (req, res) => {
   }
 });
 
+//====================cenelar ciclo==============
+app.put('/api/cancelar-ciclo/:id', autenticar, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'UPDATE agendamentos SET ciclo = $1 WHERE id = $2 RETURNING *',
+      ['nenhum', id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Agendamento não encontrado' });
+    }
+
+    res.json({ success: true, agendamento: result.rows[0] });
+  } catch (err) {
+    console.error('Erro ao cancelar ciclo:', err);
+    res.status(500).json({ success: false, error: 'Erro ao cancelar ciclo' });
+  }
+});
+
 
 
 
