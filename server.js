@@ -147,10 +147,8 @@ app.post('/agendar', autenticar, async (req, res) => {
     const recebidaDateLocal = new Date(recebida);
     const recebidaUTC = new Date(recebidaDateLocal.getTime() - recebidaDateLocal.getTimezoneOffset() * 60000);
 
-    // Substitui no req.body para validar e salvar corretamente em UTC
     req.body.dataEnvio = recebidaUTC.toISOString();
 
-    // Logs para verificação
     console.log('==============================');
     console.log('🕓 Data original do cliente:', recebida);
     console.log('🕓 Convertida para UTC:', req.body.dataEnvio);
@@ -162,22 +160,23 @@ app.post('/agendar', autenticar, async (req, res) => {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { numero, cliente, carro, motor, placa, mensagem, dataEnvio } = value;
+    const { numero, cliente, mensagem, dataEnvio, ciclo } = value;
 
     const result = await pool.query(
-      `INSERT INTO agendamentos (numero, cliente, carro, motor, placa, mensagem, data_envio_texto, enviado)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, false)
+      `INSERT INTO agendamentos (numero, cliente, mensagem, data_envio_texto, ciclo, enviado)
+       VALUES ($1, $2, $3, $4, $5, false)
        RETURNING *`,
-      [numero, cliente, carro, motor, placa, mensagem,  dataEnvio.toISOString()]
+      [numero, cliente, mensagem, dataEnvio.toISOString(), ciclo]
     );
 
     res.status(200).json({ success: true, agendamento: result.rows[0] });
 
   } catch (err) {
     console.error('Erro ao agendar:', err);
-    res.status(500).send('Erro ao salvar agendamento');
+    res.status(500).json({ success: false, error: 'Erro ao salvar agendamento' });
   }
 });
+
 
 
 // ========== LISTAR AGENDAMENTOS ==========
