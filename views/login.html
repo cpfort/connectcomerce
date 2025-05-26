@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - ConectSmart</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; }
+    form { max-width: 400px; margin: auto; background: white; padding: 2rem; border-radius: 8px; }
+    input { display: block; width: 100%; padding: 10px; margin: 10px 0; }
+    button { padding: 10px; width: 100%; background-color: #1e88e5; color: white; border: none; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Login Pneusul-ConectSmart</h2>
+  <form  id="loginForm" method="POST" action="/login">
+    <input type="hidden" name="_csrf" value="%%CSRF_TOKEN%%">
+    <input type="text" name="usuario" placeholder="Usuário" required>
+    <input type="password" name="senha" placeholder="Senha" required>
+    <button type="submit">Entrar</button>
+  </form>
+  <script src="/js/login.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+require('dotenv').config();
+const express = require('express');
+const session = require('express-session');
+const helmet = require('helmet');
+const csurf = require('csurf');
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
+const fs = require('fs');
+const path = require('path');
+const pool = require('./db');
+const pgSession = require('connect-pg-simple')(session);
+const bcrypt = require('bcryptjs');
+const agendamentoSchema = require('./validators/agendamentoValidator');
+const autenticar = require('./middlewares/auth');
+
+
+
+const app = express();
+const PORT = process.env.PORT || 8080;
+
+// Teste de conexão com o banco
+pool.query('SELECT NOW()', (err, result) => {
+  if (err) {
+    console.error('❌ ERRO NA CONEXÃO COM O BANCO:', err);
+  } else {
+    console.log('✅ BANCO CONECTADO:', result.rows[0].now);
+  }
+});
+
+// ========== SEGURANÇA ==========
+app.set('trust proxy', 1);
+app.use(helmet());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use(session({
+  store: new pgSession({ pool, tableName: 'session' }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'strict',
+    maxAge: 1000 * 60 * 60 * 2 // 2 horas
+  }
+}));
+
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Muitas requisições deste IP. Tente mais tarde.'
+}));
+
+// ========== CSRF ==========
+app.use(csurf());
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+
+// ========== STATIC ==========
+app.use(express.static('public'));
+
+// ========== ROTA TOKEN ==========
+app.get('/api/csrf-token', (req, res) => {
+  res.json({
+    csrfToken: req.csrfToken(),
+    authenticated: !!req.session.authenticated
+  });
+});
+//==============================
+app.get('/', (req, res) => {
+  if (req.session.authenticated) {
+    res.redirect('/dashboard');
+  } else {
+    res.redirect('/login');
+  }
+});
+
+//==========================
+app.get('/login', (req, res) => {
+  fs.readFile(path.join(__dirname, 'views', 'login.html'), 'utf8', (err, html) => {
+    if (err) return res.status(500).send('Erro ao carregar o login');
+    const htmlComToken = html.replace('%%CSRF_TOKEN%%', req.csrfToken());
+    res.send(htmlComToken);
+  });
+});
+// ========== LOGIN ==========
+app.post('/login', async (req, res) => {
+  const { usuario, senha } = req.body;
+
+  try {
+    const result = await pool.query('SELECT * FROM usuarios WHERE usuario = $1', [usuario]);
+
+    if (result.rowCount === 0) {
+      return res.status(401).json({ success: false, message: 'Usuário não encontrado' });
+    }
+
+    const usuarioBanco = result.rows[0];
+
+    const senhaCorreta = await bcrypt.compare(senha, usuarioBanco.senha_hash);
+
+    if (!senhaCorreta) {
+      return res.status(401).json({ success: false, message: 'Senha incorreta' });
+    }
+
+    req.session.authenticated = true;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erro no login:', err);
+    res.status(500).send('Erro interno');
+  }
+});
+
+// ========== LOGOUT ==========
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Erro ao fazer logout:', err);
+      return res.status(500).send('Erro ao sair');
+    }
+    res.clearCookie('connect.sid');
+    res.redirect('/login'); // ou outra página de login
+  });
+});
+
+
+// ========== DASHBOARD ==========
+app.get('/dashboard', (req, res) => {
+  fs.readFile(path.join(__dirname, 'views', 'dashboard.html'), 'utf8', (err, html) => {
+    if (err) return res.status(500).send('Erro ao carregar o dashboard');
+    const htmlComToken = html.replace('%%CSRF_TOKEN%%', req.csrfToken());
+    res.send(htmlComToken);
+  });
+});
+
+
+
+// ========== AGENDAR ==========
+app.post('/agendar', autenticar, async (req, res) => {
+  try {
+    const recebida = req.body.dataEnvio;
+    const recebidaDateLocal = new Date(recebida);
+    const recebidaUTC = new Date(recebidaDateLocal.getTime() - recebidaDateLocal.getTimezoneOffset() * 60000);
+
+    // Substitui no req.body para validar e salvar corretamente em UTC
+    req.body.dataEnvio = recebidaUTC.toISOString();
+
+    // Logs para verificação
+    console.log('==============================');
+    console.log('🕓 Data original do cliente:', recebida);
+    console.log('🕓 Convertida para UTC:', req.body.dataEnvio);
+    console.log('==============================');
+
+    const { error, value } = agendamentoSchema.validate(req.body);
+    if (error) {
+      console.error('❌ Erro de validação Joi:', error.details);
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { numero, cliente, carro, motor, placa, mensagem, dataEnvio } = value;
+
+    const result = await pool.query(
+      `INSERT INTO agendamentos (numero, cliente, carro, motor, placa, mensagem, data_envio_texto, enviado)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, false)
+       RETURNING *`,
+      [numero, cliente, carro, motor, placa, mensagem,  dataEnvio.toISOString()]
+    );
+
+    res.status(200).json({ success: true, agendamento: result.rows[0] });
+
+  } catch (err) {
+    console.error('Erro ao agendar:', err);
+    res.status(500).send('Erro ao salvar agendamento');
+  }
+});
+
+
+// ========== LISTAR AGENDAMENTOS ==========
+// Exemplo no server.js ou routes.js
+app.get('/api/agendamentos', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM agendamentos ORDER BY data_envio_texto ASC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar agendamentos' });
+  }
+});
+
+
+
+
+
+// ========== EDITAR AGENDAMENTO ==========
+app.put('/api/agendamentos/:id', autenticar, async (req, res) => {
+  const { error, value } = agendamentoSchema.validate(req.body);
+
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  try {
+    const { numero, cliente, carro, motor, placa, mensagem, dataEnvio, enviado } = value;
+    const result = await pool.query(
+      `UPDATE agendamentos SET
+        numero = $1, cliente = $2, carro = $3, motor = $4,
+        placa = $5, mensagem = $6, data_envio_texto = $7, enviado = $8
+       WHERE id = $9 RETURNING *`,
+      [numero, cliente, carro, motor, placa, mensagem, dataEnvio, enviado, req.params.id]
+    );
+
+    if (result.rowCount === 0) return res.status(404).send('Agendamento não encontrado');
+
+    res.json({ success: true, agendamento: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao atualizar agendamento');
+  }
+});
+
+//==============delete===========
+app.delete('/api/agendamentos/:id', autenticar, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { rowCount } = await pool.query(
+      'DELETE FROM agendamentos WHERE id = $1 AND enviado = false',
+      [id]
+    );
+
+    if (rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Agendamento não encontrado ou já enviado' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erro ao remover agendamento:', err);
+    res.status(500).json({ error: 'Erro ao remover agendamento' });
+  }
+});
+
+
+
+
+// ========== START ==========
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
+
+
+//======================setinterval===================
+setInterval(async () => {
+  const agora = new Date();
+  console.log(`[TIMER] Verificando mensagens até ${agora.toISOString()}`);
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT * FROM agendamentos 
+      WHERE enviado = false
+    `);
+
+    const agendamentosValidos = rows.filter(ag => {
+      try {
+        if (!ag.data_envio_texto) return false;
+        const data = new Date(ag.data_envio_texto);
+        if (isNaN(data.getTime())) {
+          console.error(`❌ Data inválida no agendamento ID ${ag.id}:`, ag.data_envio_texto);
+          return false;
+        }
+        return data <= agora;
+      } catch (e) {
+        console.error(`❌ Erro ao processar agendamento ID ${ag.id}:`, e);
+        return false;
+      }
+    });
+
+    if (agendamentosValidos.length === 0) {
+      console.log('[TIMER] Nenhuma mensagem para enviar.');
+      return;
+    }
+
+    for (const ag of agendamentosValidos) {
+      console.log(`📤 Enviando para ${ag.numero}: ${ag.mensagem}`);
+
+      await pool.query(
+        'UPDATE agendamentos SET enviado = true WHERE id = $1',
+        [ag.id]
+      );
+
+      console.log(`✅ Marcado como enviado (ID ${ag.id})`);
+    }
+
+  } catch (err) {
+    console.error('❌ Erro no envio automático:', err);
+  }
+}, 60 * 1000); // Executa a cada 60 segundos

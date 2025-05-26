@@ -1,0 +1,31 @@
+Adicionada a configuração do express-session logo após a criação do app. Isso garante que a sessão seja gerenciada corretamente.
+
+Ajustado o cookie para ser seguro (usando cookie: { secure: false } durante o desenvolvimento). Em produção, com HTTPS, você deverá configurar secure: true.
+
+Corrigido a sequência de middlewares para garantir que a sessão seja acessível antes de qualquer operação.
+
+Com essas correções, seu servidor agora deve funcionar corretamente com a sessão, sem o erro de "Cannot read properties of undefined". Se você estiver em ambiente de desenvolvimento, ele funcionará normalmente; em produção, com HTTPS, ajuste o cookie de sessão.
+
+
+
+
+
+
+Em produção, altere secure: false para secure: true quando usar HTTPS.
+
+Configure um servidor HTTPS usando um certificado SSL (autoassinado para testes ou um certificado válido para produção).
+
+Não se esqueça de testar sempre em um ambiente de staging (pré-produção) antes de fazer o deploy em produção.
+
+git add .
+git commit -m "removemask2"
+git push origin main
+
+git reset --soft HEAD~4
+
+redis-15467.c12.us-east-1-4.ec2.cloud.redislabs.com
+curl -v https://conectsmart-production.up.railway.app
+
+dir /A:D C:\Users\HP\Desktop\conectsmart-main
+
+

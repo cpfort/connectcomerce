@@ -1,0 +1,143 @@
+[33m5c12060[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Refatoração dos últimos 30 commits
+[33m4fafa5d[m new2
+[33m56f0f36[m new2
+[33m732b20f[m new2
+[33m604a6b2[m new2
+[33m5e163fc[m new2
+[33m8f57e39[m new2
+[33m0ff2f11[m new2
+[33m0034383[m new2
+[33mb403a0f[m new2
+[33m327635f[m new2
+[33m40c997a[m new2
+[33ma7a3e9a[m new2
+[33mc6b3124[m new2
+[33m127e9db[m new2
+[33m969341b[m new2
+[33m47c4d3a[m new2
+[33m6c681af[m new2
+[33m250c462[m new2
+[33m0af196c[m new2
+[33md6a8f65[m new2
+[33m0c4e320[m new2
+[33me06ba43[m new2
+[33m343973a[m new2
+[33m05e27b4[m new2
+[33m6dc6b69[m new2
+[33m30c1212[m new2
+[33m877eb39[m new
+[33me41cb76[m new
+[33m1338c26[m new
+[33mcf68636[m new
+[33m589c907[m new
+[33m3201e2f[m new
+[33mc2098b4[m new
+[33md18054b[m new
+[33m0b96a25[m new
+[33md158dcf[m new
+[33m92f4abe[m new
+[33m5887d02[m new
+[33me87f301[m new
+[33m80b4fc3[m new
+[33m949cde0[m new
+[33me757dc8[m new
+[33mfb033a4[m new
+[33m0a433cd[m new
+[33m99ff697[m new
+[33maafbeaf[m new
+[33m750039d[m new
+[33m1bc7ae1[m new
+[33ma83bf39[m 0551
+[33m77d2d5d[m Nova mensagem de commit
+[33m4875323[m 0551
+[33mf41c64f[m 0551
+[33m3ee02fe[m 0550
+[33m727f61c[m 0550
+[33m9dacdc0[m 0550
+[33mf849f12[m redenrezandoestatico
+[33m464dccd[m redenrezandoestatico
+[33mc9d9044[m redenrezandoestatico
+[33md87b519[m redenrezandoestatico
+[33mad37bdc[m redenrezandoestatico
+[33m9ea0b94[m redenrezandoestatico
+[33m0196613[m redenrezandoestatico
+[33m77e12af[m redenrezandoestatico
+[33m343775e[m redenrezandoestatico
+[33mdea45ba[m redenrezandoestatico
+[33me4ffe9f[m deepseck5
+[33mdb00492[m deepseck5
+[33m582440a[m deepseck5
+[33mebab06d[m deepseck5
+[33m471f835[m deepseck5
+[33m97eb7e4[m deepseck4
+[33m55b9486[m deepseck4
+[33mf3e4848[m deepseck4
+[33m8db8f7d[m deepseck4
+[33m374f517[m deepseck3
+[33me387329[m deepseck
+[33m2335e23[m redis+cfrcorrecaoredis
+[33m0989f58[m redis+cfrcorrecaoredis
+[33mb05f4d8[m redis+cfrcorrecaoredis
+[33m811b48d[m redis+cfrcorrecao
+[33mec60689[m redis+cfrcorrecao
+[33m94ee803[m redis+cfr
+[33m3d00c4b[m Atualiza segurança: helmet, rate-limit01
+[33m5dc9100[m Atualiza segurança: helmet, rate-limit, sessão e login sem CSRF
+[33mbf8cb91[m Corrigido problema de duplicação no front-end
+[33m41c53fd[m Resolvido conflito no front-end
+[33md181fd8[m Resolvendo conflitos no package-lock.json
+[33m0730a04[m Inicializando repositório com arquivos atualizados
+[33m0f79aea[m Add files via upload
+[33m7a43283[m Add files via upload
+[33mc801179[m Add files via upload
+[33m0e2c6c8[m Update modelo.css
+[33m8906f7c[m Update agendamento.js
+[33m4caef61[m Update modelo.css
+[33mcf5e549[m Update agendamento.js
+[33m86cb41e[m Update messages.js
+[33ma456931[m Update agendamento.js
+[33m8745c9e[m Update index.html
+[33m5015597[m Update agendamento.js
+[33me7ec7d8[m Update modelo.css
+[33m7d7f657[m Update index.html
+[33m66219cf[m Update agendamento.js
+[33m2796ad8[m Update agendamento.js
+[33m29bf66a[m Update messages.js
+[33ma16b649[m Update agendamento.js
+[33m00d0758[m Update index.html
+[33mfc9b842[m Create agendamento.js
+[33ma080690[m Create logout.js
+[33m5a68817[m Update login.html
+[33mfc6c0d4[m Update index.html
+[33m49545d6[m Update index.html
+[33m42f7c3f[m Update index.html
+[33m89313ed[m Update scheduler.js
+[33m9631b0e[m Update server.js
+[33me222d08[m Update server.js
+[33m45350ef[m Update index.html
+[33ma212a11[m Update server.js
+[33m70c0b82[m Update index.html
+[33me8c0dd9[m Add files via upload
+[33m62a53df[m Update index.html
+[33ma248424[m Update .env
+[33m7c69875[m Update server.js
+[33m70ab6bd[m Update server.js
+[33md8c700b[m Update server.js
+[33m3a362d5[m Update .env
+[33mec2a2bb[m Add files via upload
+[33m1dffa3d[m Add files via upload
+[33m5db22b1[m Add files via upload
+[33mf5492be[m Update .env
+[33m65c12dc[m Add files via upload
+[33m1121270[m Add files via upload
+[33m1adca0b[m Delete public/style.css
+[33m9896110[m Add files via upload
+[33m2d9956b[m Update index.html
+[33m964ae95[m Add files via upload
+[33m2e2654b[m Add files via upload
+[33m6c8f497[m Add files via upload
+[33m002f47c[m Add files via upload
+[33m64f0eae[m Delete style.css
+[33m837529f[m Add files via upload
+[33m76d32ce[m Update index.html
+[33m07ff0b4[m Add files via upload

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>ConectSmart - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+       font-size: 4vw;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+
+    }
+
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #28a745;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .logout-button {
+      background-color: #dc3545;
+      margin-top: 10px;
+    }
+
+    .logout-button:hover {
+      background-color: #c82333;
+    }
+
+    .agendamentos {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .agendamento {
+      border-left: 5px solid #3498db;
+      padding: 10px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+      border-radius: 6px;
+    }
+
+    .agendamento.enviado {
+      border-left-color: #2ecc71;
+      background: #eafaf1;
+    }
+
+    .agendamento strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+
+  #agendamentosContainer {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.card-agendamento {
+  background: #fff;
+  border-left: 5px solid #28a745;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card-agendamento p {
+  margin: 5px 0;
+  color: #333;
+}
+
+.card-agendamento .info {
+  font-weight: bold;
+}
+img{
+  align-items: center;
+  text-align: center;
+  display: block;
+  margin: 0 auto;
+ width: 30vw;
+}
+
+  </style>
+</head>
+<body>
+ <img src="pnseul-removebg-preview.png" alt="" srcset="">
+<div class="container">
+ 
+  <h1>Mensagem Programada Pneusul</h1>
+  
+
+
+  <!-- Formulário -->
+  <form id="formMensagem">
+    <input type="hidden" name="_csrf" value="%%CSRF_TOKEN%%" id="csrfToken">
+
+    <label for="numero">Número do WhatsApp:</label>
+    <input type="text" id="numero" name="numero" required>
+
+    <label for="cliente">Nome do Cliente:</label>
+    <input type="text" id="cliente" name="cliente" required>
+
+    <label for="carro">Veículo:</label>
+    <input type="text" id="carro" name="carro" required>
+
+    <label for="motor">Motor:</label>
+    <input type="text" id="motor" name="motor" required>
+
+    <label for="placa">Placa:</label>
+    <input type="text" id="placa" name="placa" required>
+
+    <label for="mensagem">Mensagem:</label>
+    <textarea id="mensagem" name="mensagem" rows="4" required></textarea>
+
+    <label for="dataEnvio">Data de Envio:</label>
+    <input type="datetime-local" id="dataEnvio" name="dataEnvio" required>
+
+    <button type="submit">Agendar Mensagem</button>
+  </form>
+
+<form action="/logout" method="GET">
+  <button type="submit" class="logout-button">Sair</button>
+  </form>
+
+
+
+
+  <!-- Lista de Agendamentos -->
+  <div class="agendamentos">
+    <h2>Agendamentos Futuros</h2>
+    <div id="listaAgendamentos">Carregando agendamentos...</div>
+  </div>
+</div>
+
+
+
+
+<h2>Mensagens Agendadas</h2>
+<div id="agendamentosContainer"></div>
+
+
+<script src="/js/inputmask.min.js"></script>
+<script src="/js/dashboard.js"></script>
+
+</body>
+</html>
