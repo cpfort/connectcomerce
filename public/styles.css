@@ -1,0 +1,140 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f2f5f9;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  color: #333;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+/* Formulário */
+form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+form input,
+form select,
+form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+}
+
+form button {
+  padding: 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+form button:hover {
+  background-color: #3e8e41;
+}
+
+/* Lista de agendamentos */
+.agendamento {
+  border: 1px solid #ddd;
+  background-color: #fdfdfd;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.agendamento.enviado {
+  border-left: 6px solid #4CAF50;
+  background-color: #ecfdf3;
+}
+
+.agendamento div {
+  flex-grow: 1;
+}
+
+.agendamento button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin-left: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.agendamento button:hover {
+  background-color: #0056b3;
+}
+
+/* Botões específicos */
+button.cancelarCicloBtn {
+  background-color: #f59e0b;
+}
+
+button.cancelarCicloBtn:hover {
+  background-color: #d97706;
+}
+
+button.removerBtn {
+  background-color: #e53935;
+}
+
+button.removerBtn:hover {
+  background-color: #c62828;
+}
+
+button.ocultarHistoricoBtn {
+  background-color: #6b7280;
+}
+
+button.ocultarHistoricoBtn:hover {
+  background-color: #4b5563;
+}
+
+/* Mensagem "nenhum agendamento" */
+#listaAgendamentos p {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .agendamento {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  form {
+    grid-template-columns: 1fr;
+  }
+}
