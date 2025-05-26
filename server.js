@@ -215,6 +215,26 @@ app.put('/api/agendamentos/ocultar-historico/:id', autenticar, async (req, res) 
   }
 });
 
+// ✅ DELETE de verdade no banco, só se NÃO foi enviado
+app.delete('/api/agendamentos/:id', autenticar, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM agendamentos WHERE id = $1 AND enviado = false RETURNING *',
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Agendamento não encontrado ou já foi enviado' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erro ao remover agendamento:', err);
+    res.status(500).json({ success: false, error: 'Erro ao remover agendamento' });
+  }
+});
 
 
 
