@@ -18,7 +18,7 @@ Configure um servidor HTTPS usando um certificado SSL (autoassinado para testes 
 Não se esqueça de testar sempre em um ambiente de staging (pré-produção) antes de fazer o deploy em produção.
 
 git add .
-git commit -m "0042"
+git commit -m "0043"
 git push origin main
 
 git reset --soft HEAD~4
@@ -29,3 +29,8 @@ curl -v https://conectsmart-production.up.railway.app
 dir /A:D C:\Users\HP\Desktop\conectsmart-main
 
 
+ <!-- Lista de Agendamentos -->
+  <div class="agendamentos">
+    <h2>Agendamentos Futuros</h2>
+    <div id="listaAgendamentos">Carregando agendamentos...</div>
+  </div>

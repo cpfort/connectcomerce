@@ -2,35 +2,73 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <title>ConectSmart - Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ConnectSmart Dashboard</title>
   <link rel="stylesheet" href="/styles.css">
+
+  
+
 </head>
 <body>
 
-  <div class="container">
-    <h1>ConnectSmart 📲</h1>
+ 
+<div class="container">
+ 
+  <h1>Mensagem Programada</h1>
+  
 
-    <form id="formMensagem">
-      <input type="text" name="cliente" id="cliente" placeholder="Nome do Cliente" required>
-      <input type="text" name="numero" id="numero" placeholder="Número (WhatsApp)" required>
-      <textarea name="mensagem" id="mensagem" placeholder="Digite sua mensagem" required></textarea>
-      <input type="datetime-local" name="dataEnvio" id="dataEnvio" required>
-      <select name="ciclo" id="ciclo">
-        <option value="nenhum">Agendamento Único</option>
-        <option value="semanal">Semanal</option>
-        <option value="mensal">Mensal</option>
-        <option value="trimestral">Trimestral</option>
-      </select>
-      <input type="hidden" id="csrfToken" value="%%CSRF_TOKEN%%">
-      <button type="submit">Agendar Mensagem</button>
-    </form>
 
-    <div id="listaAgendamentos"></div>
+  <!-- Formulário -->
+<form id="formMensagem">
+  <input type="hidden" name="_csrf" value="%%CSRF_TOKEN%%" id="csrfToken">
+
+  <label for="numero">Número do WhatsApp:</label>
+  <input type="text" id="numero" name="numero" required>
+
+  <label for="cliente">Nome do Cliente:</label>
+  <input type="text" id="cliente" name="cliente" required>
+
+  <label for="mensagem">Mensagem:</label>
+  <textarea id="mensagem" name="mensagem" rows="4" required></textarea>
+
+  <label for="dataEnvio">Data de Envio:</label>
+  <input type="datetime-local" id="dataEnvio" name="dataEnvio" required>
+
+  <label for="ciclo">Ciclo de Envio:</label>
+  <select id="ciclo" name="ciclo">
+    <option value="nenhum">Nenhum</option>
+    <option value="semanal">Semanal</option>
+    <option value="mensal">Mensal</option>
+    <option value="trimestral">Trimestral</option>
+  </select>
+
+  <button type="submit">Agendar Mensagem</button>
+</form>
+
+
+<form action="/logout" method="GET">
+  <button type="submit" class="logout-button">Sair</button>
+  </form>
+
+
+
+
+  <!-- Lista de Agendamentos -->
+  <div class="agendamentos">
+    <h2>Agendamentos Futuros</h2>
+    <div id="listaAgendamentos">Carregando agendamentos...</div>
   </div>
+</div>
 
-  <script src="https://unpkg.com/inputmask/dist/inputmask.min.js"></script>
-  <script src="/dashboard.js"></script>
+
+
+
+
+<div id="agendamentosContainer"></div>
+
+<script src="https://unpkg.com/inputmask/dist/inputmask.min.js"></script>
+<script src="/js/inputmask.min.js"></script>
+<script src="/js/dashboard.js"></script>
 
 </body>
 </html>
