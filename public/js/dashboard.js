@@ -50,9 +50,7 @@ form.addEventListener('submit', async (e) => {
 async function carregarAgendamentos() {
   try {
     const res = await fetch('/api/agendamentos', {
-      headers: {
-        'CSRF-Token': csrfToken
-      },
+      headers: { 'CSRF-Token': csrfToken },
       credentials: 'include'
     });
 
@@ -88,7 +86,7 @@ async function carregarAgendamentos() {
           ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌ Cancelar Ciclo</button>` : ''}
           ${ag.enviado 
             ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}">📦 Ocultar do Histórico</button>` 
-            : `<button class="ocultarBtn" data-id="${ag.id}">🗑️ Ocultar</button>`
+            : `<button class="removerBtn" data-id="${ag.id}">🗑️ Remover</button>`
           }
         </div>
       `;
@@ -96,7 +94,7 @@ async function carregarAgendamentos() {
       container.appendChild(div);
     });
 
-    // 🔥 Botão cancelar ciclo
+    // 🔥 Cancelar Ciclo
     document.querySelectorAll('.cancelarCicloBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
@@ -120,31 +118,31 @@ async function carregarAgendamentos() {
       });
     });
 
-    // 🔥 Ocultar (não enviado)
-    document.querySelectorAll('.ocultarBtn').forEach(btn => {
+    // 🔥 Remover (Antes de ser enviado)
+    document.querySelectorAll('.removerBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
-        if (!confirm('Deseja ocultar este agendamento?')) return;
+        if (!confirm('Deseja remover este agendamento? Essa ação não pode ser desfeita.')) return;
         try {
-          const res = await fetch(`/api/agendamentos/ocultar/${id}`, {
-            method: 'PUT',
+          const res = await fetch(`/api/agendamentos/${id}`, {
+            method: 'DELETE',
             headers: { 'CSRF-Token': csrfToken }
           });
           const json = await res.json();
           if (json.success) {
-            alert('✅ Agendamento ocultado');
+            alert('✅ Agendamento removido');
             carregarAgendamentos();
           } else {
-            alert('⚠️ Erro ao ocultar: ' + json.message);
+            alert('⚠️ Erro ao remover: ' + json.message);
           }
         } catch (err) {
-          console.error('Erro ao ocultar:', err);
+          console.error('Erro ao remover:', err);
           alert('Erro no servidor');
         }
       });
     });
 
-    // 🔥 Ocultar do histórico (enviado)
+    // 🔥 Ocultar do histórico (Depois de enviado)
     document.querySelectorAll('.ocultarHistoricoBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
