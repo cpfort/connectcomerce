@@ -326,6 +326,34 @@ app.get('/api/agendamentos/:id', autenticar, async (req, res) => {
     res.status(500).json({ success: false, error: 'Erro ao buscar agendamento' });
   }
 });
+//==ocultar de proteção=====
+
+app.post('/ocultar', autenticar, async (req, res) => {
+  const { id } = req.body;
+  try {
+    const resultado = await pool.query('SELECT * FROM agendamentos WHERE id = $1', [id]);
+    const agendamento = resultado.rows[0];
+
+    if (!agendamento) {
+      return res.status(404).json({ error: 'Agendamento não encontrado.' });
+    }
+
+    if (!agendamento.enviado) {
+      return res.status(400).json({ error: 'Não é possível ocultar uma mensagem que ainda não foi enviada.' });
+    }
+
+    if (agendamento.ciclo !== 'nenhum') {
+      return res.status(400).json({ error: 'Não é possível ocultar uma mensagem que está em ciclo.' });
+    }
+
+    await pool.query('DELETE FROM agendamentos WHERE id = $1', [id]);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao ocultar agendamento:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
 
 
 //====ocultar agendamento====//

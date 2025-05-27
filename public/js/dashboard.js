@@ -88,24 +88,30 @@ async function carregarAgendamentos() {
     filtrados.forEach(ag => {
       const div = document.createElement('div');
       div.className = 'agendamento' + (ag.enviado ? ' enviado' : '');
-                  div.innerHTML = `
-          <div>
-            <strong>${ag.cliente}</strong><br>
-            Número: ${ag.numero}<br>
-            Mensagem: ${ag.mensagem}<br>
-            Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
-            Ciclo: ${ag.ciclo}<br>
+      div.innerHTML = `
+      <div class="agendamento">
+        <strong>${ag.cliente}</strong><br>
+        Número: ${ag.numero}<br>
+        Mensagem: ${ag.mensagem}<br>
+        Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
+        Ciclo: ${ag.ciclo}<br>
 
-            ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}" title="Cancelar ciclo">❌Cancelar Ciclo</button>` : ''}
-            ${ag.enviado 
-              ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}" title="Ocultar do histórico">📦Ocultar</button>` 
-              : `
-                <button class="editarBtn" data-id="${ag.id}" title="Editar">✏️Edit</button>
-                <button class="removerBtn" data-id="${ag.id}" title="Remover">🗑️Remover</button>
-              `
-            }
-          </div>
-        `;
+        <div class="botoes">
+          ${ag.ciclo !== 'nenhum' 
+            ? `<button class="cancelarCicloBtn" data-id="${ag.id}" title="Cancelar ciclo">❌Cancelar Ciclo</button>` 
+            : ''
+          }
+
+          ${ag.enviado && ag.ciclo === 'nenhum'
+            ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}" title="Ocultar do histórico">📦Ocultar</button>`
+            : `
+              <button class="editarBtn" data-id="${ag.id}" title="Editar">✏️Edit</button>
+              <button class="removerBtn" data-id="${ag.id}" title="Remover">🗑️Remover</button>
+            `
+          }
+        </div>
+      </div>
+`;
 
       container.appendChild(div);
     });
@@ -116,30 +122,30 @@ async function carregarAgendamentos() {
     console.error('Erro ao carregar agendamentos:', error);
   }
 
-document.querySelectorAll('.editarBtn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const id = btn.getAttribute('data-id');
+  document.querySelectorAll('.editarBtn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
 
-    try {
-      const res = await fetch(`/api/agendamentos/${id}`, {
-        headers: { 'CSRF-Token': csrfToken }
-      });
+      try {
+        const res = await fetch(`/api/agendamentos/${id}`, {
+          headers: { 'CSRF-Token': csrfToken }
+        });
 
-      const agendamento = await res.json();
+        const agendamento = await res.json();
 
-      if (!agendamento) {
-        alert('⚠️ Agendamento não encontrado');
-        return;
+        if (!agendamento) {
+          alert('⚠️ Agendamento não encontrado');
+          return;
+        }
+
+        abrirModalEditar(id, agendamento.mensagem);
+
+      } catch (err) {
+        console.error('Erro ao buscar agendamento:', err);
+        alert('Erro no servidor');
       }
-
-      abrirModalEditar(id, agendamento.mensagem);
-
-    } catch (err) {
-      console.error('Erro ao buscar agendamento:', err);
-      alert('Erro no servidor');
-    }
+    });
   });
-});
 
 
 }
