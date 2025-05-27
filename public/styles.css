@@ -1,120 +1,145 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f7f7f7;
+/* Reset básico */
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f2f5f9;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  color: #333;
   padding: 20px;
 }
 
 h1 {
   text-align: center;
-  color: #333;
-}
-
-#formMensagem, #filtroContainer, #relatorios {
-  background-color: #fff;
-  padding: 15px;
   margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  color: #222;
 }
 
-input, select, textarea, button {
-  padding: 8px;
-  margin: 5px 0;
-  border-radius: 5px;
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+/* Formulário */
+form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+form input,
+form select,
+form textarea {
+  padding: 10px;
   border: 1px solid #ccc;
+  border-radius: 8px;
   width: 100%;
-  box-sizing: border-box;
 }
 
-input:focus, select:focus, textarea:focus {
-  border-color: #007BFF;
-  outline: none;
-}
-
-button {
-  background-color: #007BFF;
+form button {
+  padding: 12px;
+  background-color: #4CAF50;
   color: white;
   border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-/* 🔥 Lista de Agendamentos */
-#listaAgendamentos {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-/* 🔥 Card de cada agendamento */
-.agendamento {
-  background-color: white;
-  padding: 15px;
   border-radius: 8px;
-  border-left: 5px solid #007BFF;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  position: relative;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+form button:hover {
+  background-color: #3e8e41;
+}
+
+/* Lista de agendamentos */
+.agendamento {
+  border: 1px solid #ddd;
+  background-color: #fdfdfd;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .agendamento.enviado {
-  border-left-color: #28a745;
+  border-left: 6px solid #4CAF50;
+  background-color: #98ffc3;
 }
 
-.agendamento p {
-  margin: 5px 0;
+.agendamento div {
+  flex-grow: 1;
 }
 
-/* 🔥 Botões dentro dos cards */
-.botoes {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
+.agendamento button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin-left: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.botoes button {
-  flex: 1;
-  font-size: 14px;
+.agendamento button:hover {
+  background-color: #0056b3;
 }
 
-.botoes button[title~="Remover"] {
-  background-color: #dc3545;
+/* Botões específicos */
+button.cancelarCicloBtn {
+  background-color: #f59e0b;
 }
 
-.botoes button[title~="Remover"]:hover {
-  background-color: #a71d2a;
+button.cancelarCicloBtn:hover {
+  background-color: #d97706;
 }
 
-.botoes button[title~="Editar"] {
-  background-color: #ffc107;
-  color: #333;
+button.removerBtn {
+  background-color: #e53935;
 }
 
-.botoes button[title~="Editar"]:hover {
-  background-color: #d39e00;
+button.removerBtn:hover {
+  background-color: #c62828;
 }
 
-.botoes button[title~="Ocultar"] {
-  background-color: #6c757d;
+button.ocultarHistoricoBtn {
+  background-color: #6b7280;
 }
 
-.botoes button[title~="Ocultar"]:hover {
-  background-color: #5a6268;
+button.ocultarHistoricoBtn:hover {
+  background-color: #4b5563;
 }
 
-.botoes button[title~="Cancelar"] {
-  background-color: #fd7e14;
+/* Mensagem "nenhum agendamento" */
+#listaAgendamentos p {
+  text-align: center;
+  color: #666;
+  font-style: italic;
 }
 
-.botoes button[title~="Cancelar"]:hover {
-  background-color: #e8590c;
-}
+/* Responsividade */
+@media (max-width: 600px) {
+  .agendamento {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-/* 🔥 Modal de edição */
-#modalEditar {
+  form {
+    grid-template-columns: 1fr;
+  }
+}
+/* Modal */
+.modal {
   display: none;
   position: fixed;
   z-index: 999;
@@ -124,48 +149,41 @@ button:hover {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.6);
 }
 
-#modalEditar .modal-content {
+.modal-content {
   background-color: #fff;
   margin: auto;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   width: 90%;
   max-width: 400px;
-  position: relative;
+  text-align: center;
 }
 
-#modalEditar .close {
+.close {
   color: #aaa;
-  position: absolute;
-  right: 15px;
-  top: 10px;
-  font-size: 28px;
-  font-weight: bold;
+  float: right;
+  font-size: 24px;
   cursor: pointer;
 }
 
-#modalEditar .close:hover {
-  color: black;
+.close:hover {
+  color: red;
 }
 
-/* 🔥 Filtro e relatórios */
-#filtroContainer, #relatorios {
+.botoes {
+  margin-top: 5px;
   display: flex;
-  gap: 10px;
-  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
-
-#filtro {
-  flex: 1;
+.agendamento {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
 }
 
-/* 🔥 Responsividade */
-@media (max-width: 600px) {
-  .botoes {
-    flex-direction: column;
-  }
-}
