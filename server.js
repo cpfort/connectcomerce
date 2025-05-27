@@ -308,6 +308,24 @@ app.get('/api/relatorio', autenticar, async (req, res) => {
   }
 });
 
+//====buscar agendamento no banco======
+//Buscar agendamento por ID
+app.get('/api/agendamentos/:id', autenticar, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query('SELECT * FROM agendamentos WHERE id = $1', [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Agendamento não encontrado' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Erro ao buscar agendamento:', err);
+    res.status(500).json({ success: false, error: 'Erro ao buscar agendamento' });
+  }
+});
 
 
 //====ocultar agendamento====//
@@ -365,20 +383,26 @@ app.put('/api/cancelar-ciclo/:id', autenticar, async (req, res) => {
 // ========== EDITAR AGENDAMENTO ==========
 app.put('/api/agendamentos/:id', autenticar, async (req, res) => {
   const { error, value } = agendamentoSchema.validate(req.body);
-
   if (error) return res.status(400).json({ error: error.details[0].message });
 
   try {
-    const { numero, cliente, carro, motor, placa, mensagem, dataEnvio, enviado } = value;
+    const { numero, cliente, mensagem, dataEnvio, ciclo, enviado } = value;
+
     const result = await pool.query(
       `UPDATE agendamentos SET
-        numero = $1, cliente = $2, carro = $3, motor = $4,
-        placa = $5, mensagem = $6, data_envio_texto = $7, enviado = $8
-       WHERE id = $9 RETURNING *`,
-      [numero, cliente, carro, motor, placa, mensagem, dataEnvio, enviado, req.params.id]
+        numero = $1,
+        cliente = $2,
+        mensagem = $3,
+        data_envio_texto = $4,
+        ciclo = $5,
+        enviado = $6
+      WHERE id = $7 RETURNING *`,
+      [numero, cliente, mensagem, dataEnvio, ciclo, enviado, req.params.id]
     );
 
-    if (result.rowCount === 0) return res.status(404).send('Agendamento não encontrado');
+    if (result.rowCount === 0) {
+      return res.status(404).send('Agendamento não encontrado');
+    }
 
     res.json({ success: true, agendamento: result.rows[0] });
   } catch (err) {
@@ -386,6 +410,7 @@ app.put('/api/agendamentos/:id', autenticar, async (req, res) => {
     res.status(500).send('Erro ao atualizar agendamento');
   }
 });
+
 
 
 

@@ -21,7 +21,7 @@ git add .
 git commit -m "0045"
 git push origin main
 
-apartir 44
+apartir 45 ok
 
 git reset --soft HEAD~4
 

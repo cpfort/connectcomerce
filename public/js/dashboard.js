@@ -88,7 +88,7 @@ async function carregarAgendamentos() {
     filtrados.forEach(ag => {
       const div = document.createElement('div');
       div.className = 'agendamento' + (ag.enviado ? ' enviado' : '');
-      div.innerHTML = `
+            div.innerHTML = `
         <div>
           <strong>${ag.cliente}</strong><br>
           Número: ${ag.numero}<br>
@@ -96,10 +96,13 @@ async function carregarAgendamentos() {
           Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
           Ciclo: ${ag.ciclo}<br>
 
-          ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌ Cancelar Ciclo</button>` : ''}
+          ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌</button>` : ''}
           ${ag.enviado 
-            ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}">📦 Ocultar do Histórico</button>` 
-            : `<button class="removerBtn" data-id="${ag.id}">🗑️ Remover</button>`
+            ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}">📦</button>` 
+            : `
+              <button class="editarBtn" data-id="${ag.id}" title="Editar">✏️</button>
+              <button class="removerBtn" data-id="${ag.id}">🗑️</button>
+            `
           }
         </div>
       `;
@@ -179,6 +182,70 @@ document.getElementById('relatorioOcultos').addEventListener('click', () => baix
 function baixarRelatorio(filtro) {
   window.open(`/api/relatorio?filtro=${filtro}`, '_blank');
 }
+
+// ✏️ Editar agendamento (antes de ser enviado)
+document.querySelectorAll('.editarBtn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.getAttribute('data-id');
+    
+    try {
+      const res = await fetch(`/api/agendamentos/${id}`, {
+        headers: { 'CSRF-Token': csrfToken }
+      });
+      const agendamento = await res.json();
+
+      if (!agendamento) {
+        alert('⚠️ Agendamento não encontrado');
+        return;
+      }
+
+      const novoCliente = prompt('Editar cliente:', agendamento.cliente);
+      if (novoCliente === null) return;
+
+      const novoNumero = prompt('Editar número:', agendamento.numero);
+      if (novoNumero === null) return;
+
+      const novaMensagem = prompt('Editar mensagem:', agendamento.mensagem);
+      if (novaMensagem === null) return;
+
+      const novaData = prompt('Editar data (YYYY-MM-DD HH:MM):', agendamento.data_envio_texto.replace('T', ' ').slice(0, 16));
+      if (novaData === null) return;
+
+      const novoCiclo = prompt('Editar ciclo (nenhum, semanal, mensal, trimestral):', agendamento.ciclo);
+      if (novoCiclo === null) return;
+
+      const dataISO = new Date(novaData).toISOString();
+
+      const atualiza = await fetch(`/api/agendamentos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({
+          cliente: novoCliente,
+          numero: novoNumero,
+          mensagem: novaMensagem,
+          dataEnvio: dataISO,
+          ciclo: novoCiclo,
+          enviado: false
+        })
+      });
+
+      const json = await atualiza.json();
+      if (json.success) {
+        alert('✅ Agendamento atualizado!');
+        carregarAgendamentos();
+      } else {
+        alert('⚠️ Erro ao atualizar: ' + json.message);
+      }
+
+    } catch (err) {
+      console.error('Erro ao editar:', err);
+      alert('Erro no servidor');
+    }
+  });
+});
 
 
 
