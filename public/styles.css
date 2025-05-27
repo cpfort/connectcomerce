@@ -65,14 +65,19 @@ form button:hover {
 }
 /* Lista de agendamentos */
 .agendamento {
-  position: relative;
-  padding: 10px;
-  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 2px solid #28a745;
   border-radius: 8px;
+  padding: 10px;
+  background-color: #f8fff8;
   margin-bottom: 10px;
-  background-color: #fff;
+  position: relative;
 }
-
+.conteudo {
+  flex: 1;
+}
 .agendamento .botoes {
   position: absolute;
   top: 8px;
@@ -152,10 +157,7 @@ button.ocultarHistoricoBtn:hover {
 
 /* Responsividade */
 @media (max-width: 600px) {
-  .agendamento {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+ 
   .botoes {
     justify-content: flex-end;
     flex-wrap: wrap;
@@ -201,10 +203,10 @@ button.ocultarHistoricoBtn:hover {
 }
 
 .botoes {
-  margin-top: 5px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+   display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 
