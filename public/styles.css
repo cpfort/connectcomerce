@@ -68,7 +68,7 @@ form button:hover {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border: 2px solid #28a745;
+  border: 2px solid #f2fcf4;
   border-radius: 8px;
   padding: 10px;
   background-color: #f8fff8;
@@ -79,7 +79,7 @@ form button:hover {
   flex: 1;
 }
 .agendamento .botoes {
-  position: absolute;
+  position: relative;
   top: 8px;
   right: 8px;
   display: flex;
