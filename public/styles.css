@@ -74,6 +74,8 @@ form button:hover {
   background-color: #f8fff8;
   margin-bottom: 10px;
   position: relative;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .conteudo {
   flex: 1;
