@@ -58,7 +58,10 @@ form button:hover {
   background-color: #3e8e41;
 }
 .logout-button{
-  background-color: #c93030;
+  background-color: #c74343;
+}
+.logout-button:hover {
+  background-color: #c83333;
 }
 /* Lista de agendamentos */
 .agendamento {
