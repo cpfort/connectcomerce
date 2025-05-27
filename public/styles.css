@@ -60,16 +60,27 @@ form button:hover {
 
 /* Lista de agendamentos */
 .agendamento {
+  position: relative;
+  padding: 10px;
   border: 1px solid #ddd;
-  background-color: #fdfdfd;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background-color: #fff;
 }
+
+.agendamento .botoes {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.agendamento strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
 
 .agendamento.enviado {
   border-left: 6px solid #4CAF50;
@@ -179,11 +190,5 @@ button.ocultarHistoricoBtn:hover {
   gap: 8px;
   flex-wrap: wrap;
 }
-.agendamento {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
-  background-color: #f9f9f9;
-}
+
 
