@@ -96,12 +96,12 @@ async function carregarAgendamentos() {
           Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
           Ciclo: ${ag.ciclo}<br>
 
-          ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌</button>` : ''}
+          ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌Cancelar Ciclo</button>` : ''}
           ${ag.enviado 
-            ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}">📦</button>` 
+            ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}">📦Ocultar</button>` 
             : `
-              <button class="editarBtn" data-id="${ag.id}" title="Editar">✏️</button>
-              <button class="removerBtn" data-id="${ag.id}">🗑️</button>
+              <button class="editarBtn" data-id="${ag.id}" title="Editar">✏️Edit</button>
+              <button class="removerBtn" data-id="${ag.id}">🗑️Remover</button>
             `
           }
         </div>
