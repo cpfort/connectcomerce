@@ -88,24 +88,24 @@ async function carregarAgendamentos() {
     filtrados.forEach(ag => {
       const div = document.createElement('div');
       div.className = 'agendamento' + (ag.enviado ? ' enviado' : '');
-            div.innerHTML = `
-        <div>
-          <strong>${ag.cliente}</strong><br>
-          Número: ${ag.numero}<br>
-          Mensagem: ${ag.mensagem}<br>
-          Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
-          Ciclo: ${ag.ciclo}<br>
+                  div.innerHTML = `
+          <div>
+            <strong>${ag.cliente}</strong><br>
+            Número: ${ag.numero}<br>
+            Mensagem: ${ag.mensagem}<br>
+            Data: ${new Date(ag.data_envio_texto).toLocaleString('pt-BR')}<br>
+            Ciclo: ${ag.ciclo}<br>
 
-          ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}">❌Cancelar Ciclo</button>` : ''}
-          ${ag.enviado 
-            ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}">📦Ocultar</button>` 
-            : `
-              <button class="editarBtn" data-id="${ag.id}" title="Editar">✏️Edit</button>
-              <button class="removerBtn" data-id="${ag.id}">🗑️Remover</button>
-            `
-          }
-        </div>
-      `;
+            ${ag.ciclo !== 'nenhum' ? `<button class="cancelarCicloBtn" data-id="${ag.id}" title="Cancelar ciclo">❌</button>` : ''}
+            ${ag.enviado 
+              ? `<button class="ocultarHistoricoBtn" data-id="${ag.id}" title="Ocultar do histórico">📦</button>` 
+              : `
+                <button class="editarBtn" data-id="${ag.id}" title="Editar">✏️</button>
+                <button class="removerBtn" data-id="${ag.id}" title="Remover">🗑️</button>
+              `
+            }
+          </div>
+        `;
 
       container.appendChild(div);
     });
@@ -115,6 +115,71 @@ async function carregarAgendamentos() {
   } catch (error) {
     console.error('Erro ao carregar agendamentos:', error);
   }
+
+  document.querySelectorAll('.editarBtn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.getAttribute('data-id');
+
+    try {
+      const res = await fetch(`/api/agendamentos/${id}`, {
+        headers: { 'CSRF-Token': csrfToken }
+      });
+
+      const agendamento = await res.json();
+
+      if (!agendamento) {
+        alert('⚠️ Agendamento não encontrado');
+        return;
+      }
+
+      const novoCliente = prompt('Editar cliente:', agendamento.cliente);
+      if (novoCliente === null) return;
+
+      const novoNumero = prompt('Editar número:', agendamento.numero);
+      if (novoNumero === null) return;
+
+      const novaMensagem = prompt('Editar mensagem:', agendamento.mensagem);
+      if (novaMensagem === null) return;
+
+      const novaData = prompt('Editar data (YYYY-MM-DD HH:MM):', agendamento.data_envio_texto.replace('T', ' ').slice(0, 16));
+      if (novaData === null) return;
+
+      const novoCiclo = prompt('Editar ciclo (nenhum, semanal, mensal, trimestral):', agendamento.ciclo);
+      if (novoCiclo === null) return;
+
+      const dataISO = new Date(novaData).toISOString();
+
+      const atualiza = await fetch(`/api/agendamentos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({
+          cliente: novoCliente,
+          numero: novoNumero,
+          mensagem: novaMensagem,
+          dataEnvio: dataISO,
+          ciclo: novoCiclo,
+          enviado: false
+        })
+      });
+
+      const json = await atualiza.json();
+      if (json.success) {
+        alert('✅ Agendamento atualizado!');
+        carregarAgendamentos();
+      } else {
+        alert('⚠️ Erro ao atualizar: ' + json.message);
+      }
+
+    } catch (err) {
+      console.error('Erro ao editar:', err);
+      alert('Erro no servidor');
+    }
+  });
+});
+
 }
 
 // 🎯 Adiciona eventos nos botões de ações
@@ -183,69 +248,8 @@ function baixarRelatorio(filtro) {
   window.open(`/api/relatorio?filtro=${filtro}`, '_blank');
 }
 
-// ✏️ Editar agendamento (antes de ser enviado)
-document.querySelectorAll('.editarBtn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const id = btn.getAttribute('data-id');
-    
-    try {
-      const res = await fetch(`/api/agendamentos/${id}`, {
-        headers: { 'CSRF-Token': csrfToken }
-      });
-      const agendamento = await res.json();
 
-      if (!agendamento) {
-        alert('⚠️ Agendamento não encontrado');
-        return;
-      }
 
-      const novoCliente = prompt('Editar cliente:', agendamento.cliente);
-      if (novoCliente === null) return;
-
-      const novoNumero = prompt('Editar número:', agendamento.numero);
-      if (novoNumero === null) return;
-
-      const novaMensagem = prompt('Editar mensagem:', agendamento.mensagem);
-      if (novaMensagem === null) return;
-
-      const novaData = prompt('Editar data (YYYY-MM-DD HH:MM):', agendamento.data_envio_texto.replace('T', ' ').slice(0, 16));
-      if (novaData === null) return;
-
-      const novoCiclo = prompt('Editar ciclo (nenhum, semanal, mensal, trimestral):', agendamento.ciclo);
-      if (novoCiclo === null) return;
-
-      const dataISO = new Date(novaData).toISOString();
-
-      const atualiza = await fetch(`/api/agendamentos/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'CSRF-Token': csrfToken
-        },
-        body: JSON.stringify({
-          cliente: novoCliente,
-          numero: novoNumero,
-          mensagem: novaMensagem,
-          dataEnvio: dataISO,
-          ciclo: novoCiclo,
-          enviado: false
-        })
-      });
-
-      const json = await atualiza.json();
-      if (json.success) {
-        alert('✅ Agendamento atualizado!');
-        carregarAgendamentos();
-      } else {
-        alert('⚠️ Erro ao atualizar: ' + json.message);
-      }
-
-    } catch (err) {
-      console.error('Erro ao editar:', err);
-      alert('Erro no servidor');
-    }
-  });
-});
 
 
 
