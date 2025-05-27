@@ -85,7 +85,10 @@ form button:hover {
   display: flex;
   gap: 6px;
 }
-
+.agendamento p {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
 .agendamento strong {
   display: block;
   margin-bottom: 5px;
