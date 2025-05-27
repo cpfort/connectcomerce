@@ -57,7 +57,9 @@ form button {
 form button:hover {
   background-color: #3e8e41;
 }
-
+.logout-button{
+  background-color: #c93030;
+}
 /* Lista de agendamentos */
 .agendamento {
   position: relative;
@@ -86,6 +88,13 @@ form button:hover {
   border-left: 6px solid #4CAF50;
   background-color: #98ffc3;
 }
+
+/* Mensagem não enviada (pendente) */
+.agendamento.pendente {
+  border: 2px solid #007bff;
+  background-color: #f0f8ff;
+}
+
 
 .agendamento div {
   flex-grow: 1;

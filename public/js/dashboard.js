@@ -87,7 +87,7 @@ async function carregarAgendamentos() {
 
     filtrados.forEach(ag => {
       const div = document.createElement('div');
-      div.className = 'agendamento' + (ag.enviado ? ' enviado' : '');
+      div.className = 'agendamento' + (ag.enviado ? ' enviado' : ' pendente');
       div.innerHTML = `
       <div class="agendamento">
         <strong>${ag.cliente}</strong><br>
