@@ -156,6 +156,10 @@ button.ocultarHistoricoBtn:hover {
     flex-direction: column;
     align-items: flex-start;
   }
+  .botoes {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
 
   form {
     grid-template-columns: 1fr;
