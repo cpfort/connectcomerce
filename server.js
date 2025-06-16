@@ -144,6 +144,32 @@ app.get('/dashboard', (req, res) => {
 
 // ========== AGENDAR ==========
 app.post('/agendar', autenticar, async (req, res) => {
+
+const clienteId = req.session.cliente_id; // ou como você pega o cliente
+
+  // Verifica mensagens no mês
+  const { rows } = await db.query(`
+    SELECT COUNT(*) FROM mensagens
+    WHERE cliente_id = $1 AND 
+          DATE_TRUNC('month', NOW()) = DATE_TRUNC('month', data_envio_utc::timestamp)
+  `, [clienteId]);
+
+  const mensagensMes = parseInt(rows[0].count, 10);
+
+  const limiteMensal = 100; // Ou venha do banco de dados
+
+  if (mensagensMes >= limiteMensal) {
+    return res.status(400).json({ error: 'Limite mensal de mensagens atingido.' });
+  }
+
+  if (mensagensMes === limiteMensal - 10) {
+    // Opcional: retornar aviso
+    console.log('⚠️ Cliente está a 10 mensagens do limite');
+  }
+
+  // ...continua com a lógica de salvar agendamento
+
+
   try {
     const recebida = req.body.dataEnvio;
     const recebidaDateLocal = new Date(recebida);
