@@ -27,9 +27,17 @@ router.delete('/api/leads/:id', autenticar, async (req, res) => {
 });
 
 router.put('/api/leads/:id', autenticar, async (req, res) => {
-  const { nome } = req.body;
-  await pool.query('UPDATE leads SET nome = $1 WHERE id = $2', [nome, req.params.id]);
-  res.sendStatus(200);
+ const { nome, telefone, email, interesse, produto } = req.body;
+await pool.query(`
+  UPDATE leads SET 
+    nome = COALESCE($1, nome),
+    telefone = COALESCE($2, telefone),
+    email = COALESCE($3, email),
+    interesse = COALESCE($4, interesse),
+    produto = COALESCE($5, produto)
+  WHERE id = $6
+`, [nome, telefone, email, interesse, produto, req.params.id]);
+
 });
 
 module.exports = router;
