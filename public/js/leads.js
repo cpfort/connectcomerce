@@ -1,3 +1,25 @@
+
+
+let csrfToken = '';
+
+async function obterCsrfToken() {
+  const res = await fetch('/api/csrf-token', { credentials: 'include' });
+  const data = await res.json();
+  csrfToken = data.csrfToken;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function carregarLeads() {
   const res = await fetch('/api/leads');
   const leads = await res.json();
@@ -27,7 +49,10 @@ document.getElementById('leadForm').addEventListener('submit', async (e) => {
 
   await fetch('/api/leads', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+    'Content-Type': 'application/json',
+    'CSRF-Token': csrfToken
+     },
     body: JSON.stringify(data)
   });
   e.target.reset();
@@ -36,7 +61,12 @@ document.getElementById('leadForm').addEventListener('submit', async (e) => {
 
 async function excluirLead(id) {
   if (!confirm('Deseja realmente excluir este lead?')) return;
-  await fetch('/api/leads/' + id, { method: 'DELETE' });
+ await fetch('/api/leads/' + id, {
+  method: 'DELETE',
+  headers: {
+    'CSRF-Token': csrfToken
+  }
+    });
   carregarLeads();
 }
 
@@ -44,11 +74,17 @@ async function editarLead(id) {
   const novoNome = prompt('Novo nome:');
   if (!novoNome) return;
   await fetch('/api/leads/' + id, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nome: novoNome })
-  });
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+    'CSRF-Token': csrfToken
+  },
+  body: JSON.stringify({ nome: novoNome })
+    });
   carregarLeads();
 }
 
-window.addEventListener('DOMContentLoaded', carregarLeads);
+window.addEventListener('DOMContentLoaded', async () => {
+  await obterCsrfToken();
+  carregarLeads();
+});
