@@ -88,3 +88,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   await obterCsrfToken();
   carregarLeads();
 });
+
+window.editarLead = editarLead;
+window.excluirLead = excluirLead;
