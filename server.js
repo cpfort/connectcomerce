@@ -15,6 +15,8 @@ const agendamentoSchema = require('./validators/agendamentoValidator');
 const autenticar = require('./middlewares/auth');
 const ExcelJS = require('exceljs');
 const leadsRoutes = require('./routes/leadsRoutes');
+const estoqueRoutes = require('./routes/estoqueRoutes');
+
 
 
 
@@ -87,6 +89,9 @@ app.get('/', (req, res) => {
 
 //=====
 app.use('/', leadsRoutes);
+
+//=====
+app.use('/', estoqueRoutes);
 //==========================
 app.get('/login', (req, res) => {
   fs.readFile(path.join(__dirname, 'views', 'login.html'), 'utf8', (err, html) => {
