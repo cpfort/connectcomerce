@@ -145,7 +145,30 @@ app.get('/dashboard', (req, res) => {
 // ========== AGENDAR ==========
 app.post('/agendar', autenticar, async (req, res) => {
 
+// 
+const inicioMes = new Date();
+inicioMes.setDate(1);
+inicioMes.setHours(0, 0, 0, 0);
+const inicioMesISO = inicioMes.toISOString();
 
+const mensagensMes = await pool.query(`
+  SELECT COUNT(*) FROM agendamentos
+  WHERE enviado = true AND data_envio_texto >= $1
+`, [inicioMesISO]);
+
+const totalMensagensMes = parseInt(mensagensMes.rows[0].count, 10);
+
+// Defina seu limite aqui ou carregue da tabela limites_mensais
+const LIMITE_MENSAL = 100;
+
+if (totalMensagensMes >= LIMITE_MENSAL) {
+  return res.status(403).json({ success: false, error: '⚠️ Limite mensal de mensagens atingido. Aguardando novo mês.' });
+}
+
+if (LIMITE_MENSAL - totalMensagensMes <= 10) {
+  res.setHeader('X-Alerta-Mensagens', `⚠️ Restam apenas ${LIMITE_MENSAL - totalMensagensMes} mensagens neste mês`);
+}
+//===========
 
   try {
     const recebida = req.body.dataEnvio;

@@ -47,6 +47,19 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
+//=====================
+const alerta = res.headers.get('X-Alerta-Mensagens');
+if (alerta) {
+  alert(alerta);
+}
+
+if (!res.ok) {
+  const json = await res.json();
+  alert(`⚠️ Erro: ${json.error || 'Erro desconhecido'}`);
+  return;
+}
+
+
 // 🔥 Carregar e aplicar filtro nos agendamentos
 async function carregarAgendamentos() {
   try {
