@@ -111,12 +111,33 @@ app.post('/login', async (req, res) => {
     }
 
     req.session.authenticated = true;
-    res.json({ success: true });
+    res.json({ success: true, redirect: '/home' }); // redireciona para /home
   } catch (err) {
     console.error('Erro no login:', err);
     res.status(500).send('Erro interno');
   }
 });
+
+
+//=============home
+app.get('/home', autenticar, (req, res) => {
+  fs.readFile(path.join(__dirname, 'views', 'home.html'), 'utf8', (err, html) => {
+    if (err) return res.status(500).send('Erro ao carregar a home');
+    res.send(html);
+  });
+});
+
+//===========ledas
+app.get('/leads', autenticar, (req, res) => {
+  res.send('<h2>Página de Leads (em construção)</h2>');
+});
+//=======
+
+app.get('/estoque', autenticar, (req, res) => {
+  res.send('<h2>Estoque - Visualização e edição (em construção)</h2>');
+});
+
+
 
 // ========== LOGOUT ==========
 app.get('/logout', (req, res) => {
