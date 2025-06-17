@@ -75,13 +75,15 @@ app.get('/api/csrf-token', (req, res) => {
   });
 });
 //==============================
+//==============================
 app.get('/', (req, res) => {
   if (req.session.authenticated) {
-    res.redirect('/dashboard');
+    res.redirect('/home');
   } else {
     res.redirect('/login');
   }
 });
+
 
 //==========================
 app.get('/login', (req, res) => {
