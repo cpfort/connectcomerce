@@ -296,7 +296,7 @@ btnSalvar.addEventListener('click', async () => {
 
 
 
-// 🚀 Inicialização
+//  Inicialização
 window.addEventListener('DOMContentLoaded', async () => {
   await obterCsrfToken();
   carregarAgendamentos();

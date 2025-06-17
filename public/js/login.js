@@ -15,7 +15,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     if (result.success) {
       // Redireciona para o dashboard
-      window.location.href = '/dashboard';
+      window.location.href = '/home';
     } else {
       alert(result.message || 'Login falhou');
     }
