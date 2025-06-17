@@ -14,6 +14,7 @@ const bcrypt = require('bcryptjs');
 const agendamentoSchema = require('./validators/agendamentoValidator');
 const autenticar = require('./middlewares/auth');
 const ExcelJS = require('exceljs');
+const leadsRoutes = require('./routes/leadsRoutes');
 
 
 
@@ -84,7 +85,8 @@ app.get('/', (req, res) => {
   }
 });
 
-
+//=====
+app.use('/', leadsRoutes);
 //==========================
 app.get('/login', (req, res) => {
   fs.readFile(path.join(__dirname, 'views', 'login.html'), 'utf8', (err, html) => {
