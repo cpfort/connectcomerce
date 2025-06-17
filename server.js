@@ -16,7 +16,8 @@ const autenticar = require('./middlewares/auth');
 const ExcelJS = require('exceljs');
 const leadsRoutes = require('./routes/leadsRoutes');
 const estoqueRoutes = require('./routes/estoqueRoutes');
-
+const multer = require('multer');
+  
 
 
 
