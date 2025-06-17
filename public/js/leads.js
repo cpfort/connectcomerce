@@ -27,18 +27,22 @@ async function carregarLeads() {
   tbody.innerHTML = '';
   leads.forEach(lead => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${lead.nome}</td>
-      <td>${lead.telefone}</td>
-      <td>${lead.email}</td>
-      <td>${lead.interesse}</td>
-      <td>${lead.produto}</td>
-      <td>
-        <button onclick="editarLead(${lead.id})">✏️</button>
-        <button onclick="excluirLead(${lead.id})">🗑️</button>
-      </td>
+   tr.innerHTML = `
+  <td>${lead.nome}</td>
+  <td>${lead.telefone}</td>
+  <td>${lead.email}</td>
+  <td>${lead.interesse}</td>
+  <td>${lead.produto}</td>
+  <td>
+    <button class="btn-editar" data-id="${lead.id}">✏️</button>
+    <button class="btn-excluir" data-id="${lead.id}">🗑️</button>
+  </td>
     `;
+
     tbody.appendChild(tr);
+    tr.querySelector('.btn-editar').addEventListener('click', () => editarLead(lead.id));
+    tr.querySelector('.btn-excluir').addEventListener('click', () => excluirLead(lead.id));
+
   });
 }
 
