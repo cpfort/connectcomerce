@@ -17,7 +17,7 @@ const ExcelJS = require('exceljs');
 const leadsRoutes = require('./routes/leadsRoutes');
 const estoqueRoutes = require('./routes/estoqueRoutes');
 const multer = require('multer');
-import { createClient } from '@supabase/supabase-js'
+
 
 
 
