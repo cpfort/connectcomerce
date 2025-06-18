@@ -53,12 +53,11 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 2 // 2 horas
   }
 }));
-
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Muitas requisições deste IP. Tente mais tarde.'
-}));
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10, // Limita a 10 tentativas por IP
+  message: 'Muitas tentativas de login. Tente novamente em 15 minutos.'
+});
 
 // ========== CSRF ==========
 app.use(csurf());
@@ -103,7 +102,7 @@ app.get('/login', (req, res) => {
   });
 });
 // ========== LOGIN ==========
-app.post('/login', async (req, res) => {
+app.post('/login',loginLimiter, async (req, res) => {
   const { usuario, senha } = req.body;
 
   try {
