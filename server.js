@@ -71,9 +71,7 @@ app.use((req, res, next) => {
 });
 
 //==
-const supabaseUrl = 'https://wtlxjkfsngiwknrgkaly.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
+
 // ========== STATIC ==========
 app.use(express.static('public'));
 
