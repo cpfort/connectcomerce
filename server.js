@@ -17,7 +17,7 @@ const ExcelJS = require('exceljs');
 const leadsRoutes = require('./routes/leadsRoutes');
 const estoqueRoutes = require('./routes/estoqueRoutes');
 const multer = require('multer');
-  
+
 
 
 
@@ -36,7 +36,17 @@ pool.query('SELECT NOW()', (err, result) => {
 
 // ========== SEGURANÇA ==========
 app.set('trust proxy', 1);
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", 'https://fonts.googleapis.com', 'https://www.gstatic.com'],
+      scriptSrc: ["'self'", 'https://translate.googleapis.com', 'https://www.gstatic.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:'],
+    }
+  }
+}));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -144,8 +154,9 @@ app.get('/leads', autenticar, (req, res) => {
 //=======
 
 app.get('/estoque', autenticar, (req, res) => {
-  res.send('<h2>Estoque - Visualização e edição (em construção)</h2>');
+  res.sendFile('estoque.html', { root: 'views' });
 });
+
 
 
 
