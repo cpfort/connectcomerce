@@ -19,8 +19,8 @@ async function carregarEstoque() {
       <td contenteditable="true" data-key="quantidade">${item.quantidade}</td>
       <td contenteditable="true" data-key="preco">${item.preco}</td>
       <td>
-        <button class="salvar" data-id="${item.id}">💾</button>
-        <button class="excluir" data-id="${item.id}">🗑️</button>
+        <button class="salvar" data-id="${item.id}">Editar</button>
+        <button class="excluir" data-id="${item.id}">Excluir</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -33,6 +33,8 @@ async function carregarEstoque() {
       const nome_produto = tr.querySelector('[data-key="nome_produto"]').innerText.trim();
       const quantidade = parseInt(tr.querySelector('[data-key="quantidade"]').innerText);
       const preco = parseFloat(tr.querySelector('[data-key="preco"]').innerText);
+
+      console.log('Salvando ID:', id, { nome_produto, quantidade, preco });
 
       await fetch('/api/estoque/' + id, {
         method: 'PUT',
