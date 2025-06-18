@@ -17,6 +17,8 @@ const ExcelJS = require('exceljs');
 const leadsRoutes = require('./routes/leadsRoutes');
 const estoqueRoutes = require('./routes/estoqueRoutes');
 const multer = require('multer');
+import { createClient } from '@supabase/supabase-js'
+
 
 
 
@@ -34,6 +36,7 @@ pool.query('SELECT NOW()', (err, result) => {
     console.log('✅ BANCO CONECTADO:', result.rows[0].now);
   }
 });
+
 
 // ========== SEGURANÇA ==========
 app.set('trust proxy', 1);
@@ -67,7 +70,10 @@ app.use((req, res, next) => {
   next();
 });
 
-
+//==
+const supabaseUrl = 'https://wtlxjkfsngiwknrgkaly.supabase.co'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
 // ========== STATIC ==========
 app.use(express.static('public'));
 
