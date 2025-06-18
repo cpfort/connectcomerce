@@ -20,4 +20,4 @@ async function tornarAdmin(usuario) {
 }
 
 // Altere 'caio' pelo nome do seu usuário
-tornarAdmin('caio');
+tornarAdmin('admin');

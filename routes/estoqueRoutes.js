@@ -1,13 +1,13 @@
-
 const express = require('express');
 const multer = require('multer');
 const ExcelJS = require('exceljs');
 const pool = require('../db');
 const autenticar = require('../middlewares/auth');
+const verificaAdmin = require('../middlewares/admin');
 const path = require('path');
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() }); // compatível com Railway
+const upload = multer({ storage: multer.memoryStorage() }); // Railway-friendly
 
 router.get('/estoque', autenticar, (req, res) => {
   res.sendFile('estoque.html', { root: 'views' });
@@ -18,7 +18,7 @@ router.get('/api/estoque', autenticar, async (req, res) => {
   res.json(result.rows);
 });
 
-router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req, res) => {
+router.post('/api/estoque/upload', autenticar, verificaAdmin, upload.single('file'), async (req, res) => {
   try {
     console.log('📥 Arquivo recebido:', req.file);
 
@@ -55,8 +55,7 @@ router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req
   }
 });
 
-
-router.put('/api/estoque/:id', autenticar, async (req, res) => {
+router.put('/api/estoque/:id', autenticar, verificaAdmin, async (req, res) => {
   const { serial, nome_produto, quantidade, preco } = req.body;
   await pool.query(
     'UPDATE estoque SET serial = $1, nome_produto = $2, quantidade = $3, preco = $4, atualizado_em = NOW() WHERE id = $5',
@@ -65,7 +64,7 @@ router.put('/api/estoque/:id', autenticar, async (req, res) => {
   res.sendStatus(200);
 });
 
-router.delete('/api/estoque/:id', autenticar, async (req, res) => {
+router.delete('/api/estoque/:id', autenticar, verificaAdmin, async (req, res) => {
   await pool.query('DELETE FROM estoque WHERE id = $1', [req.params.id]);
   res.sendStatus(204);
 });
