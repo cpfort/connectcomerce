@@ -6,7 +6,8 @@ const autenticar = require('../middlewares/auth');
 const path = require('path');
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
+
 
 router.get('/estoque', autenticar, (req, res) => {
   res.sendFile('estoque.html', { root: 'views' });
@@ -19,7 +20,7 @@ router.get('/api/estoque', autenticar, async (req, res) => {
 
 router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req, res) => {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(req.file.path);
+  await workbook.xlsx.load(req.file.buffer);
   const worksheet = workbook.getWorksheet(1);
 
   for (let i = 2; i <= worksheet.rowCount; i++) {
