@@ -1,14 +1,12 @@
-
 const express = require('express');
 const multer = require('multer');
-const ExcelJS = require('exceljs');
 const pool = require('../db');
 const autenticar = require('../middlewares/auth');
 const verificaAdmin = require('../middlewares/admin');
-const path = require('path');
+const supabase = require('../supabase');
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() }); // Railway-friendly
+const upload = multer({ storage: multer.memoryStorage() }); // Arquivos vão para RAM temporariamente
 
 router.get('/estoque', autenticar, (req, res) => {
   res.sendFile('estoque.html', { root: 'views' });
@@ -21,36 +19,27 @@ router.get('/api/estoque', autenticar, async (req, res) => {
 
 router.post('/api/estoque/upload', autenticar, verificaAdmin, upload.single('file'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+    if (!req.file) return res.status(400).json({ error: 'Arquivo não enviado' });
+
+    const nomeArquivo = `estoque-${Date.now()}.xlsx`;
+
+    const { data, error } = await supabase.storage
+      .from('estoque')
+      .upload(nomeArquivo, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true
+      });
+
+    if (error) {
+      console.error('❌ Erro ao enviar para Supabase:', error);
+      return res.status(500).json({ error: 'Erro ao salvar no Supabase' });
     }
 
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(req.file.buffer);
-    const worksheet = workbook.getWorksheet(1);
+    const { data: urlData } = supabase.storage.from('estoque').getPublicUrl(nomeArquivo);
 
-    if (!worksheet) {
-      return res.status(400).json({ error: 'Planilha inválida ou vazia' });
-    }
-
-    for (let i = 2; i <= worksheet.rowCount; i++) {
-      const row = worksheet.getRow(i);
-      const serial = row.getCell(1).value;
-      const nome = row.getCell(2).value;
-      const quantidade = parseInt(row.getCell(3).value) || 0;
-      const preco = parseFloat(row.getCell(4).value) || 0;
-
-      if (nome) {
-        await pool.query(
-          'INSERT INTO estoque (serial, nome_produto, quantidade, preco) VALUES ($1, $2, $3, $4)',
-          [serial, nome, quantidade, preco]
-        );
-      }
-    }
-
-    res.sendStatus(201);
+    res.json({ success: true, fileUrl: urlData.publicUrl });
   } catch (err) {
-    console.error('Erro ao processar upload:', err);
+    console.error('❌ Erro geral no upload:', err);
     res.status(500).json({ error: 'Erro interno no upload' });
   }
 });
@@ -70,9 +59,11 @@ router.delete('/api/estoque/:id', autenticar, verificaAdmin, async (req, res) =>
 });
 
 router.get('/api/estoque/relatorio', autenticar, async (req, res) => {
+  const ExcelJS = require('exceljs');
   const result = await pool.query('SELECT * FROM estoque ORDER BY nome_produto ASC');
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Relatorio_Estoque');
+
   sheet.columns = [
     { header: 'Serial', key: 'serial', width: 20 },
     { header: 'Produto', key: 'nome_produto', width: 30 },
@@ -80,6 +71,7 @@ router.get('/api/estoque/relatorio', autenticar, async (req, res) => {
     { header: 'Preço', key: 'preco', width: 15 },
     { header: 'Atualizado em', key: 'atualizado_em', width: 25 }
   ];
+
   result.rows.forEach(row => sheet.addRow(row));
 
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
