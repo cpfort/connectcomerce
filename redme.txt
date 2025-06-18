@@ -18,13 +18,13 @@ Configure um servidor HTTPS usando um certificado SSL (autoassinado para testes 
 Não se esqueça de testar sempre em um ambiente de staging (pré-produção) antes de fazer o deploy em produção.
 
 git add .
-git commit -m "0060"
+git commit -m "0061"
 git push origin main
 
 .
 
 
-apartir 59 ok
+apartir 60 ok
 
 git reset --soft HEAD~4
 

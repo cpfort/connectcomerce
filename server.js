@@ -121,6 +121,9 @@ app.post('/login', async (req, res) => {
     }
 
     req.session.authenticated = true;
+    req.session.nivel = usuarioBanco.nivel || 'usuario'; // 👈 essa linha adiciona o nível
+
+    
     res.json({ success: true, redirect: '/home' }); // redireciona para /home
   } catch (err) {
     console.error('Erro no login:', err);
