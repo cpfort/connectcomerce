@@ -5,6 +5,7 @@ const autenticar = require('../middlewares/auth');
 const verificaAdmin = require('../middlewares/admin');
 const supabase = require('../supabase');
 
+
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() }); // Arquivos vão para RAM temporariamente
 
@@ -19,28 +20,53 @@ router.get('/api/estoque', autenticar, async (req, res) => {
 
 router.post('/api/estoque/upload', autenticar, verificaAdmin, upload.single('file'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: 'Arquivo não enviado' });
+    const file = req.file;
 
-    const nomeArquivo = `estoque-${Date.now()}.xlsx`;
-
-    const { data, error } = await supabase.storage
-      .from('estoque')
-      .upload(nomeArquivo, req.file.buffer, {
-        contentType: req.file.mimetype,
-        upsert: true
-      });
-
-    if (error) {
-      console.error('❌ Erro ao enviar para Supabase:', error);
-      return res.status(500).json({ error: 'Erro ao salvar no Supabase' });
+    if (!file) {
+      return res.status(400).json({ error: 'Arquivo não encontrado' });
     }
 
-    const { data: urlData } = supabase.storage.from('estoque').getPublicUrl(nomeArquivo);
+    // Upload para o Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from('estoque')
+      .upload(`uploads/${file.originalname}`, file.buffer, {
+        contentType: file.mimetype,
+      });
 
-    res.json({ success: true, fileUrl: urlData.publicUrl });
+    if (uploadError) {
+      console.error('❌ Erro ao enviar para Supabase:', uploadError);
+      return res.status(500).json({ error: 'Erro ao enviar para Supabase' });
+    }
+
+    // Carrega e insere os dados no PostgreSQL
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(file.buffer);
+    const worksheet = workbook.getWorksheet(1);
+
+    if (!worksheet) {
+      return res.status(400).json({ error: 'Planilha inválida' });
+    }
+
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+      const row = worksheet.getRow(i);
+      const serial = row.getCell(1).value;
+      const nome = row.getCell(2).value;
+      const quantidade = parseInt(row.getCell(3).value) || 0;
+      const preco = parseFloat(row.getCell(4).value) || 0;
+
+      if (nome) {
+        await pool.query(
+          `INSERT INTO estoque (serial, nome_produto, quantidade, preco)
+           VALUES ($1, $2, $3, $4)`,
+          [serial, nome, quantidade, preco]
+        );
+      }
+    }
+
+    res.sendStatus(201);
   } catch (err) {
     console.error('❌ Erro geral no upload:', err);
-    res.status(500).json({ error: 'Erro interno no upload' });
+    res.status(500).json({ error: 'Erro no processamento do arquivo' });
   }
 });
 
