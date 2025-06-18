@@ -20,9 +20,16 @@ router.get('/api/estoque', autenticar, async (req, res) => {
 
 router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req, res) => {
   try {
+    console.log('📥 Arquivo recebido:', req.file);
+
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(req.file.buffer);
     const worksheet = workbook.getWorksheet(1);
+
+    if (!worksheet) {
+      console.error('❌ Planilha inválida');
+      return res.status(400).json({ error: 'Planilha inválida ou vazia' });
+    }
 
     for (let i = 2; i <= worksheet.rowCount; i++) {
       const row = worksheet.getRow(i);
@@ -30,6 +37,8 @@ router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req
       const nome = row.getCell(2).value;
       const quantidade = parseInt(row.getCell(3).value) || 0;
       const preco = parseFloat(row.getCell(4).value) || 0;
+
+      console.log(`[Linha ${i}]`, { serial, nome, quantidade, preco });
 
       if (nome) {
         await pool.query(
@@ -41,10 +50,11 @@ router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req
 
     res.sendStatus(201);
   } catch (err) {
-    console.error('Erro ao importar planilha:', err);
-    res.status(500).json({ error: 'Erro ao importar planilha' });
+    console.error('❌ Erro ao processar upload:', err);
+    res.status(500).json({ error: 'Erro interno no upload' });
   }
 });
+
 
 router.put('/api/estoque/:id', autenticar, async (req, res) => {
   const { serial, nome_produto, quantidade, preco } = req.body;
