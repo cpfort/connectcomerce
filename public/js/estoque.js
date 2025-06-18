@@ -87,6 +87,7 @@ document.getElementById('excelFile').addEventListener('change', async (e) => {
   e.target.value = '';
   carregarEstoque();
 });
+document.getElementById('btnRelatorio').addEventListener('click', baixarRelatorio);
 
 function baixarRelatorio() {
   window.open('/api/estoque/relatorio', '_blank');

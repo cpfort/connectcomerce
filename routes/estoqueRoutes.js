@@ -1,3 +1,4 @@
+
 const express = require('express');
 const multer = require('multer');
 const ExcelJS = require('exceljs');
@@ -6,8 +7,7 @@ const autenticar = require('../middlewares/auth');
 const path = require('path');
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
-
+const upload = multer({ storage: multer.memoryStorage() }); // compatível com Railway
 
 router.get('/estoque', autenticar, (req, res) => {
   res.sendFile('estoque.html', { root: 'views' });
@@ -19,40 +19,39 @@ router.get('/api/estoque', autenticar, async (req, res) => {
 });
 
 router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req, res) => {
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(req.file.buffer);
-  const worksheet = workbook.getWorksheet(1);
+  try {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(req.file.buffer);
+    const worksheet = workbook.getWorksheet(1);
 
-  for (let i = 2; i <= worksheet.rowCount; i++) {
-    const row = worksheet.getRow(i);
-    const serial = row.getCell(1).value;
-    const nome = row.getCell(2).value;
-    const quantidade = parseInt(row.getCell(3).value) || 0;
-    const preco = parseFloat(row.getCell(4).value) || 0;
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+      const row = worksheet.getRow(i);
+      const serial = row.getCell(1).value;
+      const nome = row.getCell(2).value;
+      const quantidade = parseInt(row.getCell(3).value) || 0;
+      const preco = parseFloat(row.getCell(4).value) || 0;
 
-    if (nome) {
-      await pool.query(`
-        INSERT INTO estoque (serial, nome_produto, quantidade, preco)
-        VALUES ($1, $2, $3, $4)
-      `, [serial, nome, quantidade, preco]);
+      if (nome) {
+        await pool.query(
+          'INSERT INTO estoque (serial, nome_produto, quantidade, preco) VALUES ($1, $2, $3, $4)',
+          [serial, nome, quantidade, preco]
+        );
+      }
     }
-  }
 
-  res.sendStatus(201);
+    res.sendStatus(201);
+  } catch (err) {
+    console.error('Erro ao importar planilha:', err);
+    res.status(500).json({ error: 'Erro ao importar planilha' });
+  }
 });
 
 router.put('/api/estoque/:id', autenticar, async (req, res) => {
   const { serial, nome_produto, quantidade, preco } = req.body;
-  await pool.query(`
-    UPDATE estoque SET
-      serial = $1,
-      nome_produto = $2,
-      quantidade = $3,
-      preco = $4,
-      atualizado_em = NOW()
-    WHERE id = $5
-  `, [serial, nome_produto, quantidade, preco, req.params.id]);
-
+  await pool.query(
+    'UPDATE estoque SET serial = $1, nome_produto = $2, quantidade = $3, preco = $4, atualizado_em = NOW() WHERE id = $5',
+    [serial, nome_produto, quantidade, preco, req.params.id]
+  );
   res.sendStatus(200);
 });
 

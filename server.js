@@ -138,14 +138,10 @@ app.get('/home', autenticar, (req, res) => {
 });
 
 //===========ledas
-app.get('/leads', autenticar, (req, res) => {
-  res.send('<h2>Página de Leads (em construção)</h2>');
-});
+
 //=======
 
-app.get('/estoque', autenticar, (req, res) => {
-  res.sendFile('estoque.html', { root: 'views' });
-});
+
 
 
 
