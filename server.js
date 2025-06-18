@@ -75,7 +75,8 @@ app.use(express.static('public'));
 app.get('/api/csrf-token', (req, res) => {
   res.json({
     csrfToken: req.csrfToken(),
-    authenticated: !!req.session.authenticated
+    authenticated: !!req.session.authenticated,
+    nivel: req.session.nivel || 'usuario'
   });
 });
 //==============================

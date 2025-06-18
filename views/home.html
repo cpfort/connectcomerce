@@ -1,4 +1,3 @@
-<!-- views/home.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,7 +12,12 @@
       padding: 40px;
     }
     h1 {
-      margin-bottom: 40px;
+      margin-bottom: 10px;
+    }
+    #usuarioLogado {
+      color: #333;
+      margin-bottom: 30px;
+      font-weight: bold;
     }
     .botoes {
       display: flex;
@@ -38,10 +42,14 @@
 </head>
 <body>
   <h1>Bem-vindo ao Painel</h1>
+  <div id="usuarioLogado">Carregando...</div>
+
   <div class="botoes">
     <a href="/leads">📇 Leads de Clientes</a>
     <a href="/estoque">📦 Estoque</a>
     <a href="/dashboard">💬 Mensagens Programadas</a>
   </div>
+
+<script src="/js/home.js"></script>
 </body>
 </html>

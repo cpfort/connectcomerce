@@ -25,8 +25,8 @@ async function carregarEstoque() {
       <td ${editable} data-key="preco">${item.preco}</td>
       <td>
         ${nivelUsuario === 'admin' ? `
-          <button class="salvar" data-id="${item.id}">Editar</button>
-          <button class="excluir" data-id="${item.id}">Excluir</button>
+          <button class="salvar" data-id="${item.id}">💾</button>
+          <button class="excluir" data-id="${item.id}">🗑️</button>
         ` : ''}
       </td>
     `;
