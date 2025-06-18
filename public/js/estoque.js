@@ -2,76 +2,95 @@ let csrfToken = '';
 let nivelUsuario = 'usuario'; // padrão
 
 async function obterCsrfToken() {
-  const res = await fetch('/api/csrf-token', { credentials: 'include' });
-  const data = await res.json();
-  csrfToken = data.csrfToken;
-  nivelUsuario = data.nivel || 'usuario';
+  try {
+    const res = await fetch('/api/csrf-token', { credentials: 'include' });
+    const data = await res.json();
+    csrfToken = data.csrfToken;
+    nivelUsuario = data.nivel || 'usuario';
+  } catch (err) {
+    console.error('Erro ao obter CSRF token:', err);
+  }
 }
 
 async function carregarEstoque() {
-  const res = await fetch('/api/estoque', { credentials: 'include' });
-  const dados = await res.json();
-  const tbody = document.querySelector('#tabelaEstoque tbody');
-  tbody.innerHTML = '';
+  try {
+    const res = await fetch('/api/estoque', { credentials: 'include' });
+    if (!res.ok) throw new Error('Falha ao carregar estoque');
+    const dados = await res.json();
 
-  dados.forEach(item => {
-    const editable = (nivelUsuario === 'admin') ? 'contenteditable="true"' : '';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td ${editable} data-key="serial">${item.serial || ''}</td>
-      <td ${editable} data-key="nome_produto">${item.nome_produto}</td>
-      <td ${editable} data-key="quantidade">${item.quantidade}</td>
-      <td ${editable} data-key="preco">${item.preco}</td>
-      <td>
-        ${nivelUsuario === 'admin' ? `
-          <button class="salvar" data-id="${item.id}">Salvar</button>
-          <button class="excluir" data-id="${item.id}">Excluir</button>
-        ` : ''}
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+    const tbody = document.querySelector('#tabelaEstoque tbody');
+    tbody.innerHTML = '';
 
-  if (nivelUsuario === 'admin') {
-    document.querySelectorAll('.salvar').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-id');
-        const tr = btn.closest('tr');
-        const serial = tr.querySelector('[data-key="serial"]').innerText.trim();
-        const nome_produto = tr.querySelector('[data-key="nome_produto"]').innerText.trim();
-        const quantidade = parseInt(tr.querySelector('[data-key="quantidade"]').innerText);
-        const preco = parseFloat(tr.querySelector('[data-key="preco"]').innerText);
-
-        await fetch('/api/estoque/' + id, {
-          method: 'PUT',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'CSRF-Token': csrfToken
-          },
-          body: JSON.stringify({ serial, nome_produto, quantidade, preco })
-        });
-
-        carregarEstoque();
-      });
+    dados.forEach(item => {
+      const editable = (nivelUsuario === 'admin') ? 'contenteditable="true"' : '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td ${editable} data-key="serial">${item.serial || ''}</td>
+        <td ${editable} data-key="nome_produto">${item.nome_produto}</td>
+        <td ${editable} data-key="quantidade">${item.quantidade}</td>
+        <td ${editable} data-key="preco">${item.preco}</td>
+        <td>
+          ${nivelUsuario === 'admin' ? `
+            <button class="salvar" data-id="${item.id}">Salvar</button>
+            <button class="excluir" data-id="${item.id}">Excluir</button>
+          ` : ''}
+        </td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    document.querySelectorAll('.excluir').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-id');
-        if (!confirm('Deseja realmente excluir este item?')) return;
+    if (nivelUsuario === 'admin') {
+      document.querySelectorAll('.salvar').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          const tr = btn.closest('tr');
 
-        await fetch('/api/estoque/' + id, {
-          method: 'DELETE',
-          credentials: 'include',
-          headers: {
-            'CSRF-Token': csrfToken
+          const serial = tr.querySelector('[data-key="serial"]').innerText.trim();
+          const nome_produto = tr.querySelector('[data-key="nome_produto"]').innerText.trim();
+          const quantidade = parseInt(tr.querySelector('[data-key="quantidade"]').innerText) || 0;
+          const preco = parseFloat(tr.querySelector('[data-key="preco"]').innerText) || 0;
+
+          try {
+            const res = await fetch(`/api/estoque/${id}`, {
+              method: 'PUT',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+                'CSRF-Token': csrfToken
+              },
+              body: JSON.stringify({ serial, nome_produto, quantidade, preco })
+            });
+
+            if (!res.ok) throw new Error('Erro ao salvar item');
+            carregarEstoque();
+          } catch (err) {
+            alert('Erro ao salvar item: ' + err.message);
           }
         });
-
-        carregarEstoque();
       });
-    });
+
+      document.querySelectorAll('.excluir').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          if (!confirm('Deseja realmente excluir este item?')) return;
+
+          try {
+            const res = await fetch(`/api/estoque/${id}`, {
+              method: 'DELETE',
+              credentials: 'include',
+              headers: { 'CSRF-Token': csrfToken }
+            });
+
+            if (!res.ok) throw new Error('Erro ao excluir item');
+            carregarEstoque();
+          } catch (err) {
+            alert('Erro ao excluir item: ' + err.message);
+          }
+        });
+      });
+    }
+  } catch (err) {
+    console.error('Erro ao carregar estoque:', err);
   }
 }
 
@@ -82,17 +101,21 @@ document.getElementById('excelFile').addEventListener('change', async (e) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  await fetch('/api/estoque/upload', {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'CSRF-Token': csrfToken
-    },
-    body: formData
-  });
+  try {
+    const res = await fetch('/api/estoque/upload', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'CSRF-Token': csrfToken },
+      body: formData
+    });
+
+    if (!res.ok) throw new Error('Falha no upload');
+    carregarEstoque();
+  } catch (err) {
+    alert('❌ Erro no upload: ' + err.message);
+  }
 
   e.target.value = '';
-  carregarEstoque();
 });
 
 document.getElementById('btnRelatorio').addEventListener('click', () => {
