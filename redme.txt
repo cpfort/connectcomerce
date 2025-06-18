@@ -26,7 +26,7 @@ git push origin main
 
 apartir 60 ok
 
-git reset --soft HEAD~4
+git reset --soft HEAD~
 
 
 git fetch origin
