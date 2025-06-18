@@ -1,9 +1,13 @@
+
 const express = require('express');
 const multer = require('multer');
+const ExcelJS = require('exceljs');
 const pool = require('../db');
 const autenticar = require('../middlewares/auth');
 const verificaAdmin = require('../middlewares/admin');
 const supabase = require('../supabase');
+
+
 
 
 const router = express.Router();
@@ -26,11 +30,12 @@ router.post('/api/estoque/upload', autenticar, verificaAdmin, upload.single('fil
       return res.status(400).json({ error: 'Arquivo não encontrado' });
     }
 
-    // Upload para o Supabase Storage
-    const { error: uploadError } = await supabase.storage
+        // Upload para o Supabase Storage
+      const { error: uploadError } = await supabase.storage
       .from('estoque')
       .upload(`uploads/${file.originalname}`, file.buffer, {
         contentType: file.mimetype,
+        upsert: true // ✅ permite sobrescrever se já existir
       });
 
     if (uploadError) {
