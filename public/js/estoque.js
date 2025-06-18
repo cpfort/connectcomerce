@@ -1,5 +1,13 @@
+let csrfToken = '';
+
+async function obterCsrfToken() {
+  const res = await fetch('/api/csrf-token', { credentials: 'include' });
+  const data = await res.json();
+  csrfToken = data.csrfToken;
+}
+
 async function carregarEstoque() {
-  const res = await fetch('/api/estoque');
+  const res = await fetch('/api/estoque', { credentials: 'include' });
   const dados = await res.json();
   const tbody = document.querySelector('#tabelaEstoque tbody');
   tbody.innerHTML = '';
@@ -18,7 +26,6 @@ async function carregarEstoque() {
     tbody.appendChild(tr);
   });
 
-  // Reatribui eventos de clique nos botões
   document.querySelectorAll('.salvar').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.getAttribute('data-id');
@@ -29,7 +36,11 @@ async function carregarEstoque() {
 
       await fetch('/api/estoque/' + id, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken
+        },
         body: JSON.stringify({ nome_produto, quantidade, preco })
       });
 
@@ -41,13 +52,20 @@ async function carregarEstoque() {
     btn.addEventListener('click', async () => {
       const id = btn.getAttribute('data-id');
       if (!confirm('Deseja realmente excluir este item?')) return;
-      await fetch('/api/estoque/' + id, { method: 'DELETE' });
+
+      await fetch('/api/estoque/' + id, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'CSRF-Token': csrfToken
+        }
+      });
+
       carregarEstoque();
     });
   });
 }
 
-// Upload do Excel
 document.getElementById('excelFile').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -57,6 +75,10 @@ document.getElementById('excelFile').addEventListener('change', async (e) => {
 
   await fetch('/api/estoque/upload', {
     method: 'POST',
+    credentials: 'include',
+    headers: {
+      'CSRF-Token': csrfToken
+    },
     body: formData
   });
 
@@ -64,10 +86,11 @@ document.getElementById('excelFile').addEventListener('change', async (e) => {
   carregarEstoque();
 });
 
-// Exportar como Excel
 function baixarRelatorio() {
   window.open('/api/estoque/relatorio', '_blank');
 }
 
-// Inicia
-window.addEventListener('DOMContentLoaded', carregarEstoque);
+window.addEventListener('DOMContentLoaded', async () => {
+  await obterCsrfToken();
+  carregarEstoque();
+});
