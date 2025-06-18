@@ -33,20 +33,21 @@ router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req
 
     const rows = [];
     worksheet.eachRow((row, index) => {
-      if (index === 1) return; // Ignora cabeçalho
+      if (index === 1) return; 
+      const serial = row.getCell(1).value;// Ignora cabeçalho
       const nome = row.getCell(1).value;
       const quantidade = parseInt(row.getCell(2).value) || 0;
       const preco = parseFloat(row.getCell(3).value) || 0;
       if (nome) {
-        rows.push([nome, quantidade, preco]);
+        rows.push([serial, nome, quantidade, preco]);
       }
     });
 
-    for (const [nome, quantidade, preco] of rows) {
+    for (const [serial,nome, quantidade, preco] of rows) {
       await pool.query(`
-        INSERT INTO estoque (nome_produto, quantidade, preco)
-        VALUES ($1, $2, $3)`,
-        [nome, quantidade, preco]
+        INSERT INTO estoque (serial,nome_produto, quantidade, preco)
+        VALUES ($1, $2, $3, 4$)`,
+        [serial, nome, quantidade, preco]
       );
     }
 
@@ -59,17 +60,18 @@ router.post('/api/estoque/upload', autenticar, upload.single('file'), async (req
 
 // Atualizar item
 router.put('/api/estoque/:id', autenticar, async (req, res) => {
-  const { nome_produto, quantidade, preco } = req.body;
+  const { serial, nome_produto, quantidade, preco } = req.body;
 
   try {
     await pool.query(`
       UPDATE estoque SET
-        nome_produto = $1,
-        quantidade = $2,
-        preco = $3,
+        serial =$1,
+        nome_produto = $2,
+        quantidade = $3,
+        preco = $4,
         atualizado_em = NOW()
-      WHERE id = $4`,
-      [nome_produto, quantidade, preco, req.params.id]
+      WHERE id = $5`,
+      [serial, nome_produto, quantidade, preco, req.params.id]
     );
     res.sendStatus(200);
   } catch (err) {
@@ -97,6 +99,7 @@ router.get('/api/estoque/relatorio', autenticar, async (req, res) => {
     const sheet = workbook.addWorksheet('Relatório de Estoque');
 
     sheet.columns = [
+      { header: 'serial', key: 'serial', width: 15 }, 
       { header: 'Produto', key: 'nome_produto', width: 30 },
       { header: 'Quantidade', key: 'quantidade', width: 15 },
       { header: 'Preço', key: 'preco', width: 15 },
