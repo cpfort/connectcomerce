@@ -19,10 +19,10 @@ async function carregarEstoque() {
       <td contenteditable="true" data-key="nome_produto">${item.nome_produto}</td>
       <td contenteditable="true" data-key="quantidade">${item.quantidade}</td>
       <td contenteditable="true" data-key="preco">${item.preco}</td>
-      <td>
+      
         
         <button class="excluir" data-id="${item.id}">Excluir</button>
-      </td>
+      
     `;
     tbody.appendChild(tr);
   });
