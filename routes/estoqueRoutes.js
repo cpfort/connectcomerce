@@ -57,7 +57,12 @@ router.post('/api/estoque/upload', autenticar, verificaAdmin, upload.single('fil
       if (nome) {
         await pool.query(
           `INSERT INTO estoque (serial, nome_produto, quantidade, preco)
-           VALUES ($1, $2, $3, $4)`,
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (serial) DO UPDATE SET
+            quantidade = estoque.quantidade + EXCLUDED.quantidade,
+            preco = EXCLUDED.preco,
+            nome_produto = EXCLUDED.nome_produto,
+            atualizado_em = NOW()`,
           [serial, nome, quantidade, preco]
         );
       }
