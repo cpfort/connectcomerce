@@ -54,7 +54,7 @@ app.use(session({
     secure: true,
     httpOnly: true,
     sameSite: 'strict',
-    maxAge: 1000 * 60 * 60 * 2 // 2 horas
+    maxAge: 1000 * 60 * 60 * 12 // 12 horas
   }
 }));
 const loginLimiter = rateLimit({
