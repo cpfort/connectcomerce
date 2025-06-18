@@ -1,6 +1,5 @@
-
 let csrfToken = '';
-let nivelUsuario = 'usuario';
+let nivelUsuario = 'usuario'; // padrão
 
 async function obterCsrfToken() {
   const res = await fetch('/api/csrf-token', { credentials: 'include' });
@@ -25,8 +24,8 @@ async function carregarEstoque() {
       <td ${editable} data-key="preco">${item.preco}</td>
       <td>
         ${nivelUsuario === 'admin' ? `
-          <button class="salvar" data-id="${item.id}">💾</button>
-          <button class="excluir" data-id="${item.id}">🗑️</button>
+          <button class="salvar" data-id="${item.id}">Salvar</button>
+          <button class="excluir" data-id="${item.id}">Excluir</button>
         ` : ''}
       </td>
     `;

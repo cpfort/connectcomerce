@@ -1,4 +1,4 @@
-
+// routes/estoqueRoutes.js
 const express = require('express');
 const multer = require('multer');
 const ExcelJS = require('exceljs');
@@ -6,36 +6,34 @@ const pool = require('../db');
 const autenticar = require('../middlewares/auth');
 const verificaAdmin = require('../middlewares/admin');
 const supabase = require('../supabase');
-
-
-
+const path = require('path');
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() }); // Arquivos vão para RAM temporariamente
+const upload = multer(); // Usando sem memoryStorage, pois multer padrao lida com buffer no req.file
 
+// === Visualizar a página ===
 router.get('/estoque', autenticar, (req, res) => {
   res.sendFile('estoque.html', { root: 'views' });
 });
 
+// === Listar estoque ===
 router.get('/api/estoque', autenticar, async (req, res) => {
   const result = await pool.query('SELECT * FROM estoque ORDER BY atualizado_em DESC');
   res.json(result.rows);
 });
 
+// === Upload do Excel e inserção no PostgreSQL ===
 router.post('/api/estoque/upload', autenticar, verificaAdmin, upload.single('file'), async (req, res) => {
   try {
     const file = req.file;
+    if (!file) return res.status(400).json({ error: 'Arquivo não encontrado' });
 
-    if (!file) {
-      return res.status(400).json({ error: 'Arquivo não encontrado' });
-    }
-
-        // Upload para o Supabase Storage
-      const { error: uploadError } = await supabase.storage
+    // Enviar para Supabase Storage
+    const { error: uploadError } = await supabase.storage
       .from('estoque')
-      .upload(`uploads/${file.originalname}`, file.buffer, {
+      .upload(`uploads/${Date.now()}-${file.originalname}`, file.buffer, {
         contentType: file.mimetype,
-        upsert: true // ✅ permite sobrescrever se já existir
+        upsert: true,
       });
 
     if (uploadError) {
@@ -43,14 +41,11 @@ router.post('/api/estoque/upload', autenticar, verificaAdmin, upload.single('fil
       return res.status(500).json({ error: 'Erro ao enviar para Supabase' });
     }
 
-    // Carrega e insere os dados no PostgreSQL
+    // Processar Excel e inserir no PostgreSQL
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(file.buffer);
     const worksheet = workbook.getWorksheet(1);
-
-    if (!worksheet) {
-      return res.status(400).json({ error: 'Planilha inválida' });
-    }
+    if (!worksheet) return res.status(400).json({ error: 'Planilha inválida' });
 
     for (let i = 2; i <= worksheet.rowCount; i++) {
       const row = worksheet.getRow(i);
@@ -75,6 +70,7 @@ router.post('/api/estoque/upload', autenticar, verificaAdmin, upload.single('fil
   }
 });
 
+// === Atualizar item (admin apenas) ===
 router.put('/api/estoque/:id', autenticar, verificaAdmin, async (req, res) => {
   const { serial, nome_produto, quantidade, preco } = req.body;
   await pool.query(
@@ -84,13 +80,14 @@ router.put('/api/estoque/:id', autenticar, verificaAdmin, async (req, res) => {
   res.sendStatus(200);
 });
 
+// === Deletar item (admin apenas) ===
 router.delete('/api/estoque/:id', autenticar, verificaAdmin, async (req, res) => {
   await pool.query('DELETE FROM estoque WHERE id = $1', [req.params.id]);
   res.sendStatus(204);
 });
 
+// === Relatório Excel para download ===
 router.get('/api/estoque/relatorio', autenticar, async (req, res) => {
-  const ExcelJS = require('exceljs');
   const result = await pool.query('SELECT * FROM estoque ORDER BY nome_produto ASC');
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Relatorio_Estoque');

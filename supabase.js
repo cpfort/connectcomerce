@@ -1,13 +1,16 @@
-require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ SUPABASE_URL ou SUPABASE_KEY não definidas.');
-  throw new Error('Variáveis de ambiente do Supabase ausentes.');
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error('❌ SUPABASE_URL ou SUPABASE_KEY não definidas no arquivo .env');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false }, // backend não precisa manter sessão
+  global: { headers: { 'x-application-name': 'connectcomerce-backend' } }
+});
+
 module.exports = supabase;
