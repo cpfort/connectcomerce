@@ -15,11 +15,12 @@ async function carregarEstoque() {
   dados.forEach(item => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
+      <td contenteditable="true" data-key="serial">${item.serial}</td>
       <td contenteditable="true" data-key="nome_produto">${item.nome_produto}</td>
       <td contenteditable="true" data-key="quantidade">${item.quantidade}</td>
       <td contenteditable="true" data-key="preco">${item.preco}</td>
       <td>
-       
+        
         <button class="excluir" data-id="${item.id}">Excluir</button>
       </td>
     `;
@@ -30,6 +31,7 @@ async function carregarEstoque() {
     btn.addEventListener('click', async () => {
       const id = btn.getAttribute('data-id');
       const tr = btn.closest('tr');
+      const serial = parseInt(tr.querySelector('[data-key="serial"]').innerText);
       const nome_produto = tr.querySelector('[data-key="nome_produto"]').innerText.trim();
       const quantidade = parseInt(tr.querySelector('[data-key="quantidade"]').innerText);
       const preco = parseFloat(tr.querySelector('[data-key="preco"]').innerText);
@@ -43,7 +45,7 @@ async function carregarEstoque() {
           'Content-Type': 'application/json',
           'CSRF-Token': csrfToken
         },
-        body: JSON.stringify({ nome_produto, quantidade, preco })
+        body: JSON.stringify({ serial,nome_produto, quantidade, preco })
       });
 
       carregarEstoque();
