@@ -146,30 +146,6 @@ app.get('/home', autenticar, (req, res) => {
 });
 
 //===========ledas
-app.post('/api/enviar-mensagem', async (req, res) => {
-  const { numero, mensagem } = req.body;
-
-  try {
-    const response = await axios.post('https://api.gupshup.io/sm/api/v1/msg', null, {
-      params: {
-        channel: 'whatsapp',
-        source: process.env.GUPSHUP_SOURCE,
-        destination: numero,
-        message,
-        'src.name': process.env.GUPSHUP_SRC_NAME
-      },
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'apikey': process.env.GUPSHUP_API_KEY
-      }
-    });
-
-    res.status(200).json({ sucesso: true, resposta: response.data });
-  } catch (err) {
-    console.error('Erro no envio via Gupshup:', err.response?.data || err.message);
-    res.status(500).json({ sucesso: false, erro: err.message });
-  }
-});
 
 //=======
 
