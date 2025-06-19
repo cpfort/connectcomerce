@@ -521,30 +521,20 @@ setInterval(async () => {
     const { rows } = await pool.query(`
       SELECT * FROM agendamentos 
       WHERE enviado = false
-    `);
+      AND data_envio_texto <= $1
+      ORDER BY data_envio_texto ASC
+      LIMIT 10
+    `, [agora.toISOString()]);
 
-    const agendamentosValidos = rows.filter(ag => {
-      try {
-        if (!ag.data_envio_texto) return false;
-        const data = new Date(ag.data_envio_texto);
-        if (isNaN(data.getTime())) {
-          console.error(`❌ Data inválida no agendamento ID ${ag.id}:`, ag.data_envio_texto);
-          return false;
-        }
-        return data <= agora;
-      } catch (e) {
-        console.error(`❌ Erro ao processar agendamento ID ${ag.id}:`, e);
-        return false;
-      }
-    });
-
-    if (agendamentosValidos.length === 0) {
+    if (rows.length === 0) {
       console.log('[TIMER] Nenhuma mensagem para enviar.');
       return;
     }
 
-    for (const ag of agendamentosValidos) {
+    for (const ag of rows) {
       console.log(`📤 Enviando para ${ag.numero}: ${ag.mensagem}`);
+
+      // TODO: Chamar função de envio Gupshup aqui
 
       await pool.query(
         'UPDATE agendamentos SET enviado = true WHERE id = $1',
@@ -557,4 +547,4 @@ setInterval(async () => {
   } catch (err) {
     console.error('❌ Erro no envio automático:', err);
   }
-}, 60 * 1000); // Executa a cada 60 segundos
+}, 60 * 1000);
