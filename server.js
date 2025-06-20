@@ -444,6 +444,7 @@ app.put('/api/agendamentos/ocultar/:id', autenticar, async (req, res) => {
 
 
 
+
 //====================cenelar ciclo==============
 app.put('/api/cancelar-ciclo/:id', autenticar, async (req, res) => {
   const { id } = req.params;
@@ -556,8 +557,6 @@ app.post('/api/disparo-massivo', autenticar, async (req, res) => {
     res.status(500).json({ success: false, message: 'Erro ao enviar mensagens.' });
   }
 });
-
-
 
 
 
