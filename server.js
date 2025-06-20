@@ -517,7 +517,6 @@ app.post('/api/disparo-massivo', autenticar, async (req, res) => {
   }
 
   try {
-    // Seleciona todos os números distintos, incluindo os ocultos
     const { rows } = await pool.query(`
       SELECT DISTINCT TRIM(numero) AS numero FROM agendamentos
       WHERE numero IS NOT NULL AND TRIM(numero) <> ''
@@ -527,21 +526,22 @@ app.post('/api/disparo-massivo', autenticar, async (req, res) => {
 
     for (const contato of rows) {
       const numero = contato.numero;
-
-      const resultado = await enviarViaGupshup(numero, mensagem);
-
-      // registra o envio no log
-      await pool.query(`
-        INSERT INTO logs_envios (numero, mensagem, status, resposta)
-        VALUES ($1, $2, $3, $4)
-      `, [
-        numero,
-        mensagem,
-        resultado.sucesso ? 'sucesso' : 'erro',
-        JSON.stringify(resultado)
-      ]);
-
-      enviados.push({ numero, sucesso: resultado.sucesso });
+      try {
+        const resultado = await enviarViaGupshup(numero, mensagem);
+        await pool.query(`
+          INSERT INTO logs_envios (numero, mensagem, status, resposta)
+          VALUES ($1, $2, $3, $4)
+        `, [
+          numero,
+          mensagem,
+          resultado.sucesso ? 'sucesso' : 'erro',
+          JSON.stringify(resultado)
+        ]);
+        enviados.push({ numero, sucesso: resultado.sucesso });
+      } catch (e) {
+        console.error(`Erro ao enviar para ${numero}:`, e);
+        enviados.push({ numero, sucesso: false, erro: e.message });
+      }
     }
 
     res.json({
@@ -556,6 +556,7 @@ app.post('/api/disparo-massivo', autenticar, async (req, res) => {
     res.status(500).json({ success: false, message: 'Erro ao enviar mensagens.' });
   }
 });
+
 
 
 
