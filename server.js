@@ -512,34 +512,36 @@ app.get('/iframe-disparo', autenticar, (req, res) => {
 
 app.post('/api/disparo-massivo', autenticar, async (req, res) => {
   const { mensagem } = req.body;
-  if (!mensagem) {
+  if (!mensagem || mensagem.trim() === '') {
     return res.status(400).json({ success: false, message: 'Mensagem vazia.' });
   }
 
   try {
-    // 🔎 Seleciona todos os números únicos da tabela agendamentos
+    // Seleciona todos os números distintos, incluindo os ocultos
     const { rows } = await pool.query(`
-      SELECT DISTINCT numero FROM agendamentos
+      SELECT DISTINCT TRIM(numero) AS numero FROM agendamentos
       WHERE numero IS NOT NULL AND TRIM(numero) <> ''
     `);
 
-    const { enviarViaGupshup } = require('./utils/gupshup');
     const enviados = [];
 
     for (const contato of rows) {
-      const resultado = await enviarViaGupshup(contato.numero, mensagem);
+      const numero = contato.numero;
 
+      const resultado = await enviarViaGupshup(numero, mensagem);
+
+      // registra o envio no log
       await pool.query(`
         INSERT INTO logs_envios (numero, mensagem, status, resposta)
         VALUES ($1, $2, $3, $4)
       `, [
-        contato.numero,
+        numero,
         mensagem,
         resultado.sucesso ? 'sucesso' : 'erro',
         JSON.stringify(resultado)
       ]);
 
-      enviados.push({ numero: contato.numero, sucesso: resultado.sucesso });
+      enviados.push({ numero, sucesso: resultado.sucesso });
     }
 
     res.json({
