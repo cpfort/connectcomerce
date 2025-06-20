@@ -501,6 +501,54 @@ app.put('/api/agendamentos/:id', autenticar, async (req, res) => {
 });
 
 
+app.get('/iframe-disparo', autenticar, (req, res) => {
+  fs.readFile(path.join(__dirname, 'views', 'disparo-massivo.html'), 'utf8', (err, html) => {
+    if (err) return res.status(500).send('Erro ao carregar disparo massivo');
+    const htmlComToken = html.replace('%%CSRF_TOKEN%%', req.csrfToken());
+    res.send(htmlComToken);
+  });
+});
+
+
+app.post('/api/disparo-massivo', autenticar, async (req, res) => {
+  const { mensagem } = req.body;
+  if (!mensagem) return res.status(400).json({ success: false, message: 'Mensagem vazia.' });
+
+  try {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const { rows } = await pool.query(`
+      SELECT DISTINCT numero FROM agendamentos
+      WHERE visivel = true AND data_envio_texto >= $1
+    `, [hoje.toISOString()]);
+
+    const { enviarViaGupshup } = require('./utils/gupshup');
+    const enviados = [];
+
+    for (const contato of rows) {
+      const resultado = await enviarViaGupshup(contato.numero, mensagem);
+
+      await pool.query(`
+        INSERT INTO logs_envios (numero, mensagem, status, resposta)
+        VALUES ($1, $2, $3, $4)
+      `, [
+        contato.numero,
+        mensagem,
+        resultado.sucesso ? 'sucesso' : 'erro',
+        JSON.stringify(resultado)
+      ]);
+
+      enviados.push({ numero: contato.numero, sucesso: resultado.sucesso });
+    }
+
+    res.json({ success: true, enviados, message: `✅ Enviado para ${enviados.length} contatos.` });
+
+  } catch (err) {
+    console.error('❌ Erro no disparo massivo:', err);
+    res.status(500).json({ success: false, message: 'Erro ao enviar mensagens.' });
+  }
+});
 
 
 

@@ -7,11 +7,11 @@ async function enviarViaGupshup(numero, mensagem) {
         channel: 'whatsapp',
         source: process.env.GUPSHUP_SOURCE,
         destination: numero,
-        message,
+        message, // a mensagem editada no app
         'src.name': process.env.GUPSHUP_SRC_NAME
       },
       headers: {
-        'apikey': process.env.GUPSHUP_API_KEY,
+        apikey: process.env.GUPSHUP_API_KEY,
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
