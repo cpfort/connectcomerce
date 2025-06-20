@@ -512,16 +512,16 @@ app.get('/iframe-disparo', autenticar, (req, res) => {
 
 app.post('/api/disparo-massivo', autenticar, async (req, res) => {
   const { mensagem } = req.body;
-  if (!mensagem) return res.status(400).json({ success: false, message: 'Mensagem vazia.' });
+  if (!mensagem) {
+    return res.status(400).json({ success: false, message: 'Mensagem vazia.' });
+  }
 
   try {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
+    // 🔎 Seleciona todos os números únicos da tabela agendamentos
     const { rows } = await pool.query(`
       SELECT DISTINCT numero FROM agendamentos
-      WHERE visivel = true AND data_envio_texto >= $1
-    `, [hoje.toISOString()]);
+      WHERE numero IS NOT NULL AND TRIM(numero) <> ''
+    `);
 
     const { enviarViaGupshup } = require('./utils/gupshup');
     const enviados = [];
@@ -542,13 +542,19 @@ app.post('/api/disparo-massivo', autenticar, async (req, res) => {
       enviados.push({ numero: contato.numero, sucesso: resultado.sucesso });
     }
 
-    res.json({ success: true, enviados, message: `✅ Enviado para ${enviados.length} contatos.` });
+    res.json({
+      success: true,
+      total: enviados.length,
+      enviados,
+      message: `✅ Mensagem enviada para ${enviados.length} contatos.`
+    });
 
   } catch (err) {
     console.error('❌ Erro no disparo massivo:', err);
     res.status(500).json({ success: false, message: 'Erro ao enviar mensagens.' });
   }
 });
+
 
 
 
